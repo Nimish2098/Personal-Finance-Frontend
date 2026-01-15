@@ -51,10 +51,18 @@ export default function BudgetsPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
+      const payload = {
+        categoryId: formData.categoryId,
+        amount: parseFloat(formData.amount), // Try 'amount' first as per typical DTO, but ensure number
+        budgetAmount: parseFloat(formData.amount), // Send both just in case backend DTO field name is different
+        month: parseInt(formData.month),
+        year: parseInt(formData.year),
+      }
+
       if (editingBudget) {
-        await budgetService.updateBudget(editingBudget.id, formData)
+        await budgetService.updateBudget(editingBudget.id, payload)
       } else {
-        await budgetService.createBudget(formData)
+        await budgetService.createBudget(payload)
       }
       setFormData({
         categoryId: "",
@@ -176,24 +184,22 @@ export default function BudgetsPage() {
                   <div className="flex justify-between text-sm">
                     <span className="text-[var(--color-text-secondary)]">Spent</span>
                     <span
-                      className={`font-semibold ${
-                        isOverBudget
+                      className={`font-semibold ${isOverBudget
                           ? "text-[var(--color-error)]"
                           : "text-[var(--color-text-primary)]"
-                      }`}
+                        }`}
                     >
                       ${budget.spentAmount.toFixed(2)}
                     </span>
                   </div>
                   <div className="h-2 rounded-full bg-[var(--color-bg-tertiary)] overflow-hidden">
                     <div
-                      className={`h-full transition-all ${
-                        isOverBudget
+                      className={`h-full transition-all ${isOverBudget
                           ? "bg-[var(--color-error)]"
                           : percentage > 80
-                          ? "bg-[var(--color-primary)]"
-                          : "bg-[var(--color-success)]"
-                      }`}
+                            ? "bg-[var(--color-primary)]"
+                            : "bg-[var(--color-success)]"
+                        }`}
                       style={{ width: `${Math.min(percentage, 100)}%` }}
                     />
                   </div>

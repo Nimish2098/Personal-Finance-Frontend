@@ -259,7 +259,24 @@ export default function Dashboard() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-bg-tertiary)" />
                   <XAxis dataKey="name" stroke="var(--color-text-muted)" />
                   <YAxis stroke="var(--color-text-muted)" />
-                  <Tooltip />
+                  <Tooltip
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-bg-tertiary)] p-2 rounded shadow-lg">
+                            <p className="text-[var(--color-text-primary)] font-semibold mb-1">{label}</p>
+                            {payload.map((entry, index) => (
+                              <div key={index} className="text-sm" style={{ color: entry.color }}>
+                                {entry.name}: ${entry.value}
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                    cursor={{ fill: 'var(--color-bg-tertiary)', opacity: 0.4 }}
+                  />
                   <Legend />
                   <Bar dataKey="income" fill="var(--color-success)" />
                   <Bar dataKey="expense" fill="var(--color-error)" />
