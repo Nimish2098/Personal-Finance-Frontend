@@ -2,7 +2,7 @@
 
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
-import { LayoutDashboard, Wallet, Layers, ArrowLeftRight, LogOut, Hexagon } from "lucide-react"
+import { LayoutDashboard, Wallet, Layers, ArrowLeftRight, LogOut, Hexagon, Target } from "lucide-react"
 
 export default function Sidebar() {
     const navigate = useNavigate()
@@ -47,8 +47,8 @@ export default function Sidebar() {
                             key={link.path}
                             to={link.path}
                             className={`group flex items-center px-3 py-3 rounded-r transition-all duration-300 relative overflow-hidden ${isActive
-                                    ? "text-[var(--color-primary)] bg-white/5 border-l-2 border-[var(--color-primary)]"
-                                    : "text-[var(--color-text-secondary)] hover:text-white hover:bg-white/5 border-l-2 border-transparent hover:border-white/20"
+                                ? "text-[var(--color-primary)] bg-white/5 border-l-2 border-[var(--color-primary)]"
+                                : "text-[var(--color-text-secondary)] hover:text-white hover:bg-white/5 border-l-2 border-transparent hover:border-white/20"
                                 }`}
                         >
                             {/* Active glow background */}
