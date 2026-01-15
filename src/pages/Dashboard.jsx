@@ -63,17 +63,30 @@ export default function Dashboard() {
         })
 
         // Set data if successful, otherwise keep null
-        if (dashboardResult.status === "fulfilled") {
+        if (dashboardResult.status === "fulfilled" && dashboardResult.value) {
           setDashboardData(dashboardResult.value)
         } else {
-          console.error("Dashboard data failed:", dashboardResult.reason);
-          setError(prev => prev + (prev ? " | " : "") + "Failed to load dashboard data: " + (dashboardResult.reason.message || "Unknown error"));
+          console.error("Dashboard data failed:", dashboardResult?.reason);
+          setError(prev => prev + (prev ? " | " : "") + "Failed to load dashboard data");
         }
 
-        if (summaryResult.status === "fulfilled") setMonthlySummary(summaryResult.value)
-        if (trendsResult.status === "fulfilled") setTrendsData(trendsResult.value)
-        if (cashFlowResult.status === "fulfilled") setCashFlowData(cashFlowResult.value)
-        if (budgetsResult.status === "fulfilled") setBudgetOverview(budgetsResult.value)
+        if (summaryResult.status === "fulfilled" && summaryResult.value) {
+          setMonthlySummary(summaryResult.value)
+        }
+
+        if (trendsResult.status === "fulfilled" && Array.isArray(trendsResult.value)) {
+          setTrendsData(trendsResult.value)
+        }
+
+        if (cashFlowResult.status === "fulfilled" && cashFlowResult.value) {
+          setCashFlowData(cashFlowResult.value)
+        }
+
+        if (budgetsResult.status === "fulfilled" && Array.isArray(budgetsResult.value)) {
+          setBudgetOverview(budgetsResult.value)
+        } else if (budgetsResult.status === "fulfilled") {
+          console.warn("Budget data is not an array:", budgetsResult.value)
+        }
 
       } catch (err) {
         setError("Unexpected error occurred")
@@ -169,8 +182,8 @@ export default function Dashboard() {
               <button
                 onClick={() => setTrendPeriod("daily")}
                 className={`px-3 py-1 rounded text-xs ${trendPeriod === "daily"
-                    ? "bg-[var(--color-primary)] text-white"
-                    : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
+                  ? "bg-[var(--color-primary)] text-white"
+                  : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
                   }`}
               >
                 Daily
@@ -178,8 +191,8 @@ export default function Dashboard() {
               <button
                 onClick={() => setTrendPeriod("weekly")}
                 className={`px-3 py-1 rounded text-xs ${trendPeriod === "weekly"
-                    ? "bg-[var(--color-primary)] text-white"
-                    : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
+                  ? "bg-[var(--color-primary)] text-white"
+                  : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
                   }`}
               >
                 Weekly
@@ -187,8 +200,8 @@ export default function Dashboard() {
               <button
                 onClick={() => setTrendPeriod("monthly")}
                 className={`px-3 py-1 rounded text-xs ${trendPeriod === "monthly"
-                    ? "bg-[var(--color-primary)] text-white"
-                    : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
+                  ? "bg-[var(--color-primary)] text-white"
+                  : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
                   }`}
               >
                 Monthly
@@ -446,8 +459,8 @@ export default function Dashboard() {
                         </td>
                         <td
                           className={`py-3 text-right font-semibold ${tx.type === "INCOME"
-                              ? "text-[var(--color-success)]"
-                              : "text-[var(--color-error)]"
+                            ? "text-[var(--color-success)]"
+                            : "text-[var(--color-error)]"
                             }`}
                         >
                           {tx.type === "INCOME" ? "+" : "-"}${Math.abs(tx.amount)}
@@ -495,10 +508,10 @@ export default function Dashboard() {
                       <div className="h-2 rounded-full bg-[var(--color-bg-tertiary)] overflow-hidden">
                         <div
                           className={`h-full transition-all ${isOverBudget
-                              ? "bg-[var(--color-error)]"
-                              : percentage > 80
-                                ? "bg-[var(--color-primary)]"
-                                : "bg-[var(--color-success)]"
+                            ? "bg-[var(--color-error)]"
+                            : percentage > 80
+                              ? "bg-[var(--color-primary)]"
+                              : "bg-[var(--color-success)]"
                             }`}
                           style={{ width: `${Math.min(percentage, 100)}%` }}
                         />
