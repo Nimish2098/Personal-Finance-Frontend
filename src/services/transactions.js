@@ -27,7 +27,19 @@ getDashboardData: async (month, year) => {
   )
   return response.data
 },
+getSpendingTrends: async (period, year, month = null) => {
+  const params = { period, year }
+  if (month) params.month = month
+  const response = await api.get("/transactions/trends", { params })
+  return response.data
+},
 
+getCashFlowAnalysis: async (month, year) => {
+  const response = await api.get(
+    `/transactions/cashflow?month=${month}&year=${year}`
+  )
+  return response.data
+},
 
   exportCSV: async () => {
     const response = await api.get("/transactions/export/csv", {

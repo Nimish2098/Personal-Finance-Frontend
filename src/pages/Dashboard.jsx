@@ -6,6 +6,8 @@ import { transactionService } from "../services/transactions"
 import {
   LineChart,
   Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -15,6 +17,8 @@ import {
   PieChart,
   Pie,
   Cell,
+  Area,
+  AreaChart,
 } from "recharts"
 
 const COLORS = ["#14b8a6", "#8b5cf6", "#3b82f6", "#f59e0b", "#ef4444"]
@@ -22,23 +26,30 @@ const COLORS = ["#14b8a6", "#8b5cf6", "#3b82f6", "#f59e0b", "#ef4444"]
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState(null)
   const [monthlySummary, setMonthlySummary] = useState(null)
+  const [trendsData, setTrendsData] = useState(null)
+  const [cashFlowData, setCashFlowData] = useState(null)
+  const [trendPeriod, setTrendPeriod] = useState("monthly") // "daily", "weekly", "monthly"
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
   useEffect(() => {
     const now = new Date()
-    const month = now.getMonth() + 1 // JS months are 0-based
+    const month = now.getMonth() + 1
     const year = now.getFullYear()
 
     const fetchData = async () => {
       try {
-        const [dashboard, summary] = await Promise.all([
+        const [dashboard, summary, trends, cashFlow] = await Promise.all([
           transactionService.getDashboardData(month, year),
           transactionService.getMonthlySummary(month, year),
+          transactionService.getSpendingTrends(trendPeriod, year, month),
+          transactionService.getCashFlowAnalysis(month, year),
         ])
 
         setDashboardData(dashboard)
         setMonthlySummary(summary)
+        setTrendsData(trends)
+        setCashFlowData(cashFlow)
       } catch (err) {
         setError("Failed to load dashboard data")
         console.error(err)
@@ -48,14 +59,12 @@ export default function Dashboard() {
     }
 
     fetchData()
-  }, [])
+  }, [trendPeriod])
 
   if (loading) {
     return (
-      <div>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--color-primary)]"></div>
-        </div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--color-primary)]"></div>
       </div>
     )
   }
@@ -120,38 +129,109 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Charts */}
+        {/* Spending Trends Over Time */}
+        <Card className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">
+                Spending Trends Over Time
+              </h3>
+              <p className="text-xs text-[var(--color-text-muted)]">
+                Track your income and expenses across different periods
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setTrendPeriod("daily")}
+                className={`px-3 py-1 rounded text-xs ${
+                  trendPeriod === "daily"
+                    ? "bg-[var(--color-primary)] text-white"
+                    : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
+                }`}
+              >
+                Daily
+              </button>
+              <button
+                onClick={() => setTrendPeriod("weekly")}
+                className={`px-3 py-1 rounded text-xs ${
+                  trendPeriod === "weekly"
+                    ? "bg-[var(--color-primary)] text-white"
+                    : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
+                }`}
+              >
+                Weekly
+              </button>
+              <button
+                onClick={() => setTrendPeriod("monthly")}
+                className={`px-3 py-1 rounded text-xs ${
+                  trendPeriod === "monthly"
+                    ? "bg-[var(--color-primary)] text-white"
+                    : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
+                }`}
+              >
+                Monthly
+              </button>
+            </div>
+          </div>
+          {trendsData && trendsData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={350}>
+              <AreaChart data={trendsData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-bg-tertiary)" />
+                <XAxis dataKey="period" stroke="var(--color-text-muted)" />
+                <YAxis stroke="var(--color-text-muted)" />
+                <Tooltip />
+                <Legend />
+                <Area
+                  type="monotone"
+                  dataKey="income"
+                  stackId="1"
+                  stroke="var(--color-success)"
+                  fill="var(--color-success)"
+                  fillOpacity={0.6}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="expense"
+                  stackId="1"
+                  stroke="var(--color-error)"
+                  fill="var(--color-error)"
+                  fillOpacity={0.6}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="text-center py-8 text-[var(--color-text-muted)]">
+              No trend data available
+            </div>
+          )}
+        </Card>
+
+        {/* Charts Row: Income vs Expenses + Category Breakdown */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
+          {/* Enhanced Income vs Expenses */}
           {monthlySummary && (
             <Card>
               <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-1">
-                Income vs Expenses
+                Income vs Expenses Summary
               </h3>
               <p className="text-xs text-[var(--color-text-muted)] mb-4">
-                Monthly comparison for the last month
+                Current month comparison
               </p>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart
-                  data={[
-                    {
-                      name: "This Month",
-                      income: monthlySummary.income,
-                      expense: monthlySummary.expense,
-                    },
-                  ]}
-                >
+                <BarChart data={[monthlySummary]}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-bg-tertiary)" />
-                  <XAxis  dataKey="name" stroke="var(--color-text-muted)" />
+                  <XAxis dataKey="name" stroke="var(--color-text-muted)" />
                   <YAxis stroke="var(--color-text-muted)" />
                   <Tooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="income" stroke="var(--color-success)" />
-                  <Line type="monotone" dataKey="expense" stroke="var(--color-error)" />
-                </LineChart>
+                  <Bar dataKey="income" fill="var(--color-success)" />
+                  <Bar dataKey="expense" fill="var(--color-error)" />
+                </BarChart>
               </ResponsiveContainer>
             </Card>
           )}
 
+          {/* Category Breakdown - Pie Chart */}
           {dashboardData?.categoryBreakdown && (
             <Card>
               <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-1">
@@ -209,6 +289,98 @@ export default function Dashboard() {
             </Card>
           )}
         </div>
+
+        {/* Category Breakdown - Bar Chart View */}
+        {dashboardData?.categoryBreakdown && (
+          <Card className="mb-8">
+            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-1">
+              Category-wise Spending Breakdown
+            </h3>
+            <p className="text-xs text-[var(--color-text-muted)] mb-4">
+              Detailed view of expenses by category
+            </p>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={dashboardData.categoryBreakdown}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-bg-tertiary)" />
+                <XAxis dataKey="name" stroke="var(--color-text-muted)" />
+                <YAxis stroke="var(--color-text-muted)" />
+                <Tooltip />
+                <Bar dataKey="value" fill="var(--color-primary)" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+        )}
+
+        {/* Cash Flow Analysis */}
+        {cashFlowData && (
+          <Card className="mb-8">
+            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-1">
+              Cash Flow Analysis
+            </h3>
+            <p className="text-xs text-[var(--color-text-muted)] mb-4">
+              Track your daily cash flow and balance
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+              <div>
+                <div className="text-xs text-[var(--color-text-muted)]">Opening Balance</div>
+                <div className="text-lg font-semibold text-[var(--color-text-primary)]">
+                  ${cashFlowData.openingBalance || 0}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-[var(--color-text-muted)]">Total Inflow</div>
+                <div className="text-lg font-semibold text-[var(--color-success)]">
+                  ${cashFlowData.totalInflow || 0}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-[var(--color-text-muted)]">Total Outflow</div>
+                <div className="text-lg font-semibold text-[var(--color-error)]">
+                  ${cashFlowData.totalOutflow || 0}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-[var(--color-text-muted)]">Closing Balance</div>
+                <div className="text-lg font-semibold text-[var(--color-text-primary)]">
+                  ${cashFlowData.closingBalance || 0}
+                </div>
+              </div>
+            </div>
+            {cashFlowData.dailyFlow && cashFlowData.dailyFlow.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={cashFlowData.dailyFlow}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-bg-tertiary)" />
+                  <XAxis dataKey="date" stroke="var(--color-text-muted)" />
+                  <YAxis stroke="var(--color-text-muted)" />
+                  <Tooltip />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="inflow"
+                    stroke="var(--color-success)"
+                    name="Inflow"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="outflow"
+                    stroke="var(--color-error)"
+                    name="Outflow"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="balance"
+                    stroke="var(--color-primary)"
+                    name="Balance"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="text-center py-8 text-[var(--color-text-muted)]">
+                No cash flow data available
+              </div>
+            )}
+          </Card>
+        )}
 
         {/* Bottom section: Recent Transactions + Budget Overview */}
         <div className="grid md:grid-cols-2 gap-6">
@@ -274,7 +446,6 @@ export default function Dashboard() {
             <p className="text-sm text-[var(--color-text-muted)] mb-4">
               Track your spending limits.
             </p>
-            {/* Placeholder budget sections – replace with real data if needed */}
             <div className="space-y-4 text-sm">
               <div>
                 <div className="flex justify-between mb-1">
