@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard"
 import AccountsPage from "./pages/AccountsPage"
 import CategoriesPage from "./pages/CategoriesPage"
 import TransactionsPage from "./pages/TransactionsPage"
+import BudgetsPage from "./pages/BudgetsPage"
 
 export default function App() {
   return (
