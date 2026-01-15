@@ -52,7 +52,9 @@ export default function Dashboard() {
           budgetService.getBudgetOverview(month, year),
         ])
 
+
         const [dashboardResult, summaryResult, trendsResult, cashFlowResult, budgetsResult] = results
+        // const budgetsResult = { status: "rejected", reason: "Disabled" } // Fallback
 
         // Log errors for debugging
         results.forEach((result, index) => {

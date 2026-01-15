@@ -2,10 +2,10 @@ import api from "./api"
 
 export const budgetService = {
   getBudgets: async (month = null, year = null) => {
-    const params = {}
-    if (month) params.month = month
-    if (year) params.year = year
-    const response = await api.get("/budgets", { params })
+    if (month && year) {
+      return (await api.get(`/budgets/month?month=${month}&year=${year}`)).data
+    }
+    const response = await api.get("/budgets")
     return response.data
   },
 
@@ -25,8 +25,9 @@ export const budgetService = {
   },
 
   getBudgetOverview: async (month, year) => {
+    // Backend doesn't have /dashboard, using /month
     const response = await api.get(
-      `/budgets/dashboard?month=${month}&year=${year}`
+      `/budgets/month?month=${month}&year=${year}`
     )
     return response.data
   },
