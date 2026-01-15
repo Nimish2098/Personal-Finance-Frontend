@@ -57,6 +57,16 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+  path="/budgets"
+  element={
+    <ProtectedRoute>
+      <Layout>
+        <BudgetsPage />
+      </Layout>
+    </ProtectedRoute>
+  }
+/>
       </Routes>
     </AuthProvider>
   )

@@ -19,6 +19,7 @@ export default function Sidebar() {
         { path: "/accounts", label: "Accounts", icon: Wallet },
         { path: "/categories", label: "Categories", icon: Layers },
         { path: "/transactions", label: "Transactions", icon: ArrowLeftRight },
+        { path: "/budgets", label: "Budgets", icon: Target },
     ]
 
     return (

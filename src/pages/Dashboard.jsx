@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Card from "../components/Card"
 import { transactionService } from "../services/transactions"
+import { budgetService } from "../services/budgets"
 import {
   LineChart,
   Line,
@@ -29,6 +30,7 @@ export default function Dashboard() {
   const [trendsData, setTrendsData] = useState(null)
   const [cashFlowData, setCashFlowData] = useState(null)
   const [trendPeriod, setTrendPeriod] = useState("monthly") // "daily", "weekly", "monthly"
+  const [budgetOverview, setBudgetOverview] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
@@ -39,17 +41,19 @@ export default function Dashboard() {
 
     const fetchData = async () => {
       try {
-        const [dashboard, summary, trends, cashFlow] = await Promise.all([
+        const [dashboard, summary, trends, cashFlow, budgets] = await Promise.all([
           transactionService.getDashboardData(month, year),
           transactionService.getMonthlySummary(month, year),
           transactionService.getSpendingTrends(trendPeriod, year, month),
           transactionService.getCashFlowAnalysis(month, year),
+          budgetService.getBudgetOverview(month, year),  // Add this
         ])
 
         setDashboardData(dashboard)
         setMonthlySummary(summary)
         setTrendsData(trends)
         setCashFlowData(cashFlow)
+        setBudgetOverview(budgets) 
       } catch (err) {
         setError("Failed to load dashboard data")
         console.error(err)
@@ -439,43 +443,71 @@ export default function Dashboard() {
             </Card>
           )}
 
-          <Card>
-            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
-              Budget Overview
-            </h3>
-            <p className="text-sm text-[var(--color-text-muted)] mb-4">
-              Track your spending limits.
-            </p>
-            <div className="space-y-4 text-sm">
-              <div>
-                <div className="flex justify-between mb-1">
-                  <span className="text-[var(--color-text-secondary)]">Housing</span>
-                  <span className="text-[var(--color-text-primary)]">$1200 / $1500</span>
-                </div>
-                <div className="h-2 rounded-full bg-[var(--color-bg-tertiary)] overflow-hidden">
-                  <div className="h-full w-4/5 bg-[var(--color-primary)]" />
-                </div>
+          {budgetOverview && budgetOverview.length > 0 ? (
+            <Card>
+              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
+                Budget Overview
+              </h3>
+              <p className="text-sm text-[var(--color-text-muted)] mb-4">
+                Track your spending limits.
+              </p>
+              <div className="space-y-4 text-sm">
+                {budgetOverview.map((budget, idx) => {
+                  // Handle both limitAmount (from BudgetStatusDTO) and budgetAmount
+                  const budgetAmount = budget.limitAmount || budget.budgetAmount || 0
+                  const spentAmount = budget.spentAmount || 0
+                  const percentage = budget.percentageUsed !== undefined
+                    ? budget.percentageUsed
+                    : budgetAmount > 0
+                    ? (spentAmount / budgetAmount) * 100
+                    : 0
+                  const isOverBudget = budget.isExceeded !== undefined
+                    ? budget.isExceeded
+                    : percentage > 100
+
+                  return (
+                    <div key={budget.budgetId || budget.id || idx}>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-[var(--color-text-secondary)]">
+                          {budget.categoryName}
+                        </span>
+                        <span className="text-[var(--color-text-primary)]">
+                          ${spentAmount.toFixed(2)} / ${budgetAmount.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="h-2 rounded-full bg-[var(--color-bg-tertiary)] overflow-hidden">
+                        <div
+                          className={`h-full transition-all ${
+                            isOverBudget
+                              ? "bg-[var(--color-error)]"
+                              : percentage > 80
+                              ? "bg-[var(--color-primary)]"
+                              : "bg-[var(--color-success)]"
+                          }`}
+                          style={{ width: `${Math.min(percentage, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
-              <div>
-                <div className="flex justify-between mb-1">
-                  <span className="text-[var(--color-text-secondary)]">Food</span>
-                  <span className="text-[var(--color-text-primary)]">$400 / $600</span>
-                </div>
-                <div className="h-2 rounded-full bg-[var(--color-bg-tertiary)] overflow-hidden">
-                  <div className="h-full w-2/3 bg-[var(--color-success)]" />
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between mb-1">
-                  <span className="text-[var(--color-text-secondary)]">Shopping</span>
-                  <span className="text-[var(--color-text-primary)]">$300 / $500</span>
-                </div>
-                <div className="h-2 rounded-full bg-[var(--color-bg-tertiary)] overflow-hidden">
-                  <div className="h-full w-3/5 bg-[var(--color-error)]" />
-                </div>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          ) : (
+            <Card>
+              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
+                Budget Overview
+              </h3>
+              <p className="text-sm text-[var(--color-text-muted)] mb-4">
+                No budgets set for this month.
+              </p>
+              <a
+                href="/budgets"
+                className="text-[var(--color-primary)] hover:underline text-sm"
+              >
+                Create a budget →
+              </a>
+            </Card>
+          )}
         </div>
       </div>
     </div>
