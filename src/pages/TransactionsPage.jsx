@@ -32,17 +32,40 @@ export default function TransactionsPage() {
 
   const loadData = async () => {
     try {
-          const [txPage, catData, accData] = await Promise.all([
-          transactionService.getTransactions(0, 10),
-          categoryService.getCategories(),
-          accountService.getAccounts(),
-        ])
+      setLoading(true)
+      const results = await Promise.allSettled([
+        transactionService.getTransactions(0, 10),
+        categoryService.getCategories(),
+        accountService.getAccounts(),
+      ])
 
-        setTransactions(txPage.content)   
-        setCategories(catData)
-        setAccounts(accData)
+      const [txResult, catResult, accResult] = results
+
+      // Handle Transactions
+      if (txResult.status === "fulfilled") {
+        setTransactions(txResult.value.content)
+      } else {
+        console.error("Failed to load transactions:", txResult.reason)
+        setError((prev) => prev + " Failed to load transactions.")
+      }
+
+      // Handle Categories
+      if (catResult.status === "fulfilled") {
+        setCategories(catResult.value)
+      } else {
+        console.error("Failed to load categories:", catResult.reason)
+        // Don't show user error for secondary data, just log it
+      }
+
+      // Handle Accounts
+      if (accResult.status === "fulfilled") {
+        setAccounts(accResult.value)
+      } else {
+        console.error("Failed to load accounts:", accResult.reason)
+      }
+
     } catch (err) {
-      setError("Failed to load data")
+      setError("Critical failed to load data")
       console.error(err)
     } finally {
       setLoading(false)
@@ -54,20 +77,20 @@ export default function TransactionsPage() {
     try {
       await transactionService.createTransaction(formData)
       setFormData({
-          description: "",
-          amount: "",
-          type: "EXPENSE",
-          categoryId: "",
-          accountId: "",
-          transactionDate: new Date().toISOString().split("T")[0],
-        })
+        description: "",
+        amount: "",
+        type: "EXPENSE",
+        categoryId: "",
+        accountId: "",
+        transactionDate: new Date().toISOString().split("T")[0],
+      })
 
       setIsModalOpen(false)
       await loadData()
       if (!formData.accountId) {
-  setError("Please select an account")
-  return
-}
+        setError("Please select an account")
+        return
+      }
     } catch (err) {
       setError("Failed to create transaction")
       console.error(err)
@@ -146,8 +169,8 @@ export default function TransactionsPage() {
                     <td className="py-3">
                       <span
                         className={`px-2 py-1 rounded text-sm font-medium ${tx.type?.toUpperCase() === "INCOME"
-                            ? "bg-[var(--color-success)] bg-opacity-20 text-[var(--color-success)]"
-                            : "bg-[var(--color-error)] bg-opacity-20 text-[var(--color-error)]"
+                          ? "bg-[var(--color-success)] bg-opacity-20 text-[var(--color-success)]"
+                          : "bg-[var(--color-error)] bg-opacity-20 text-[var(--color-error)]"
                           }`}
                       >
                         {tx.type}
@@ -213,25 +236,25 @@ export default function TransactionsPage() {
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
-              Account
-            </label>
-            <select
-              value={formData.accountId}
-              onChange={(e) =>
-                setFormData({ ...formData, accountId: e.target.value })
-              }
-              className="w-full px-4 py-2 bg-white border border-[var(--color-bg-tertiary)] rounded-sm text-black focus:outline-none focus:border-[var(--color-primary)]"
-              required
-            >
-              <option value="">Select an account</option>
-              {accounts.map((acc) => (
-                <option key={acc.id} value={acc.id}>
-                  {acc.name}
-                </option>
-              ))}
-            </select>
-          </div>
+              <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
+                Account
+              </label>
+              <select
+                value={formData.accountId}
+                onChange={(e) =>
+                  setFormData({ ...formData, accountId: e.target.value })
+                }
+                className="w-full px-4 py-2 bg-white border border-[var(--color-bg-tertiary)] rounded-sm text-black focus:outline-none focus:border-[var(--color-primary)]"
+                required
+              >
+                <option value="">Select an account</option>
+                {accounts.map((acc) => (
+                  <option key={acc.id} value={acc.id}>
+                    {acc.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <Input
               label="Date"

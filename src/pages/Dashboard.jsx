@@ -41,22 +41,43 @@ export default function Dashboard() {
 
     const fetchData = async () => {
       try {
-        const [dashboard, summary, trends, cashFlow, budgets] = await Promise.all([
+        setLoading(true)
+        setError("")
+
+        const results = await Promise.allSettled([
           transactionService.getDashboardData(month, year),
           transactionService.getMonthlySummary(month, year),
           transactionService.getSpendingTrends(trendPeriod, year, month),
           transactionService.getCashFlowAnalysis(month, year),
-          budgetService.getBudgetOverview(month, year),  // Add this
+          budgetService.getBudgetOverview(month, year),
         ])
 
-        setDashboardData(dashboard)
-        setMonthlySummary(summary)
-        setTrendsData(trends)
-        setCashFlowData(cashFlow)
-        setBudgetOverview(budgets) 
+        const [dashboardResult, summaryResult, trendsResult, cashFlowResult, budgetsResult] = results
+
+        // Log errors for debugging
+        results.forEach((result, index) => {
+          if (result.status === "rejected") {
+            const endpoints = ["Dashboard", "Summary", "Trends", "CashFlow", "Budgets"]
+            console.error(`Failed to load ${endpoints[index]}:`, result.reason)
+          }
+        })
+
+        // Set data if successful, otherwise keep null
+        if (dashboardResult.status === "fulfilled") {
+          setDashboardData(dashboardResult.value)
+        } else {
+          console.error("Dashboard data failed:", dashboardResult.reason);
+          setError(prev => prev + (prev ? " | " : "") + "Failed to load dashboard data: " + (dashboardResult.reason.message || "Unknown error"));
+        }
+
+        if (summaryResult.status === "fulfilled") setMonthlySummary(summaryResult.value)
+        if (trendsResult.status === "fulfilled") setTrendsData(trendsResult.value)
+        if (cashFlowResult.status === "fulfilled") setCashFlowData(cashFlowResult.value)
+        if (budgetsResult.status === "fulfilled") setBudgetOverview(budgetsResult.value)
+
       } catch (err) {
-        setError("Failed to load dashboard data")
-        console.error(err)
+        setError("Unexpected error occurred")
+        console.error("Critical dashboard error:", err)
       } finally {
         setLoading(false)
       }
@@ -147,31 +168,28 @@ export default function Dashboard() {
             <div className="flex gap-2">
               <button
                 onClick={() => setTrendPeriod("daily")}
-                className={`px-3 py-1 rounded text-xs ${
-                  trendPeriod === "daily"
+                className={`px-3 py-1 rounded text-xs ${trendPeriod === "daily"
                     ? "bg-[var(--color-primary)] text-white"
                     : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
-                }`}
+                  }`}
               >
                 Daily
               </button>
               <button
                 onClick={() => setTrendPeriod("weekly")}
-                className={`px-3 py-1 rounded text-xs ${
-                  trendPeriod === "weekly"
+                className={`px-3 py-1 rounded text-xs ${trendPeriod === "weekly"
                     ? "bg-[var(--color-primary)] text-white"
                     : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
-                }`}
+                  }`}
               >
                 Weekly
               </button>
               <button
                 onClick={() => setTrendPeriod("monthly")}
-                className={`px-3 py-1 rounded text-xs ${
-                  trendPeriod === "monthly"
+                className={`px-3 py-1 rounded text-xs ${trendPeriod === "monthly"
                     ? "bg-[var(--color-primary)] text-white"
                     : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
-                }`}
+                  }`}
               >
                 Monthly
               </button>
@@ -427,11 +445,10 @@ export default function Dashboard() {
                           {tx.category}
                         </td>
                         <td
-                          className={`py-3 text-right font-semibold ${
-                            tx.type === "INCOME"
+                          className={`py-3 text-right font-semibold ${tx.type === "INCOME"
                               ? "text-[var(--color-success)]"
                               : "text-[var(--color-error)]"
-                          }`}
+                            }`}
                         >
                           {tx.type === "INCOME" ? "+" : "-"}${Math.abs(tx.amount)}
                         </td>
@@ -459,8 +476,8 @@ export default function Dashboard() {
                   const percentage = budget.percentageUsed !== undefined
                     ? budget.percentageUsed
                     : budgetAmount > 0
-                    ? (spentAmount / budgetAmount) * 100
-                    : 0
+                      ? (spentAmount / budgetAmount) * 100
+                      : 0
                   const isOverBudget = budget.isExceeded !== undefined
                     ? budget.isExceeded
                     : percentage > 100
@@ -477,13 +494,12 @@ export default function Dashboard() {
                       </div>
                       <div className="h-2 rounded-full bg-[var(--color-bg-tertiary)] overflow-hidden">
                         <div
-                          className={`h-full transition-all ${
-                            isOverBudget
+                          className={`h-full transition-all ${isOverBudget
                               ? "bg-[var(--color-error)]"
                               : percentage > 80
-                              ? "bg-[var(--color-primary)]"
-                              : "bg-[var(--color-success)]"
-                          }`}
+                                ? "bg-[var(--color-primary)]"
+                                : "bg-[var(--color-success)]"
+                            }`}
                           style={{ width: `${Math.min(percentage, 100)}%` }}
                         />
                       </div>
