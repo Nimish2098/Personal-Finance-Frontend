@@ -10,4 +10,9 @@ export const categoryService = {
     const response = await api.post("/categories", categoryData)
     return response.data
   },
+
+  deleteCategory: async (id) => {
+    const response = await api.delete(`/categories/${id}`)
+    return response.data
+  },
 }

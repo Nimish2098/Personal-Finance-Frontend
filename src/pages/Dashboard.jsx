@@ -85,6 +85,7 @@ export default function Dashboard() {
     ? ((dashboardData.totalIncome - dashboardData.totalExpense) / dashboardData.totalIncome) * 100
     : 0
 
+
   return (
     <div className="p-4 md:p-8 space-y-8">
       {/* Header */}
@@ -94,8 +95,8 @@ export default function Dashboard() {
             <Wallet className="w-8 h-8 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Finance Tracker</h1>
-            <p className="text-gray-500 text-sm">Manage your money with ease</p>
+            <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Finance Tracker</h1>
+            <p className="text-[var(--color-text-muted)] text-sm">Manage your money with ease</p>
           </div>
         </div>
         <Link to="/transactions" className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-500/30 font-medium hover:bg-blue-700 transition-colors">
@@ -107,14 +108,14 @@ export default function Dashboard() {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {/* Balance */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div className="bg-[var(--color-bg-secondary)] p-6 rounded-2xl shadow-sm border border-[var(--color-border)]">
           <div className="flex justify-between items-start mb-4">
-            <span className="text-gray-500 text-sm">Total Balance</span>
-            <div className="p-2 bg-gray-100 rounded-lg">
-              <DollarSign className="w-5 h-5 text-gray-600" />
+            <span className="text-[var(--color-text-muted)] text-sm">Total Balance</span>
+            <div className="p-2 bg-[var(--color-bg-tertiary)] rounded-lg">
+              <DollarSign className="w-5 h-5 text-[var(--color-text-secondary)]" />
             </div>
           </div>
-          <div className={`text-2xl font-bold mb-2 ${(dashboardData?.totalBalance || 0) < 0 ? 'text-red-500' : 'text-gray-900'
+          <div className={`text-2xl font-bold mb-2 ${(dashboardData?.totalBalance || 0) < 0 ? 'text-red-500' : 'text-[var(--color-text-primary)]'
             }`}>
             ${(dashboardData?.totalBalance || 0).toFixed(2)}
           </div>
@@ -124,27 +125,27 @@ export default function Dashboard() {
         </div>
 
         {/* Income */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div className="bg-[var(--color-bg-secondary)] p-6 rounded-2xl shadow-sm border border-[var(--color-border)]">
           <div className="flex justify-between items-start mb-4">
-            <span className="text-gray-500 text-sm">Total Income</span>
-            <div className="p-2 bg-green-100 rounded-lg">
+            <span className="text-[var(--color-text-muted)] text-sm">Total Income</span>
+            <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
               <TrendingUp className="w-5 h-5 text-green-600" />
             </div>
           </div>
           <div className="text-2xl font-bold text-green-600 mb-2">
             ${(dashboardData?.totalIncome || 0).toFixed(2)}
           </div>
-          <div className="text-xs text-gray-400">
+          <div className="text-xs text-[var(--color-text-muted)]">
             <Calendar className="w-3 h-3 inline mr-1" />
             All time
           </div>
         </div>
 
         {/* Expenses */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div className="bg-[var(--color-bg-secondary)] p-6 rounded-2xl shadow-sm border border-[var(--color-border)]">
           <div className="flex justify-between items-start mb-4">
-            <span className="text-gray-500 text-sm">Total Expenses</span>
-            <div className="p-2 bg-red-100 rounded-lg">
+            <span className="text-[var(--color-text-muted)] text-sm">Total Expenses</span>
+            <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-lg">
               <TrendingDown className="w-5 h-5 text-red-500" />
             </div>
           </div>
@@ -154,17 +155,17 @@ export default function Dashboard() {
         </div>
 
         {/* Transactions Count */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div className="bg-[var(--color-bg-secondary)] p-6 rounded-2xl shadow-sm border border-[var(--color-border)]">
           <div className="flex justify-between items-start mb-4">
-            <span className="text-gray-500 text-sm">Transactions</span>
-            <div className="p-2 bg-blue-100 rounded-lg">
+            <span className="text-[var(--color-text-muted)] text-sm">Transactions</span>
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
               <Calendar className="w-5 h-5 text-blue-600" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-gray-900 mb-2">
+          <div className="text-2xl font-bold text-[var(--color-text-primary)] mb-2">
             {dashboardData?.recentTransactions?.length || 0}
           </div>
-          <div className="text-xs text-gray-400">
+          <div className="text-xs text-[var(--color-text-muted)]">
             Avg: ${((dashboardData?.totalExpense || 0) / (dashboardData?.recentTransactions?.length || 1)).toFixed(2)}
           </div>
         </div>
@@ -173,26 +174,27 @@ export default function Dashboard() {
       {/* Charts Section */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Monthly Trend */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h3 className="font-bold text-gray-800 mb-6">Monthly Trend</h3>
+        <div className="bg-[var(--color-bg-secondary)] p-6 rounded-2xl shadow-sm border border-[var(--color-border)]">
+          <h3 className="font-bold text-[var(--color-text-primary)] mb-6">Monthly Trend</h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trendsData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-bg-tertiary)" />
                 <XAxis
                   dataKey="period"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: '#94a3b8', fontSize: 12 }}
+                  tick={{ fill: 'var(--color-text-muted)', fontSize: 12 }}
                   dy={10}
                 />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: '#94a3b8', fontSize: 12 }}
+                  tick={{ fill: 'var(--color-text-muted)', fontSize: 12 }}
                 />
                 <Tooltip
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)' }}
+                  labelStyle={{ color: 'var(--color-text-primary)' }}
                 />
                 <Legend iconType="circle" />
                 <Line
@@ -219,8 +221,8 @@ export default function Dashboard() {
         </div>
 
         {/* Expense Breakdown */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h3 className="font-bold text-gray-800 mb-6">Expense Breakdown</h3>
+        <div className="bg-[var(--color-bg-secondary)] p-6 rounded-2xl shadow-sm border border-[var(--color-border)]">
+          <h3 className="font-bold text-[var(--color-text-primary)] mb-6">Expense Breakdown</h3>
           <div className="h-[300px] w-full flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -239,12 +241,13 @@ export default function Dashboard() {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip contentStyle={{ backgroundColor: 'var(--color-bg-secondary)', borderRadius: '12px', border: 'none' }} itemStyle={{ color: 'var(--color-text-primary)' }} />
                 <Legend
                   layout="vertical"
                   verticalAlign="middle"
                   align="left"
                   iconType="circle"
+                  wrapperStyle={{ color: 'var(--color-text-secondary)' }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -253,19 +256,19 @@ export default function Dashboard() {
       </div>
 
       {/* Top Categories Progress */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h3 className="font-bold text-gray-800 mb-6">Top Spending Categories</h3>
+      <div className="bg-[var(--color-bg-secondary)] p-6 rounded-2xl shadow-sm border border-[var(--color-border)]">
+        <h3 className="font-bold text-[var(--color-text-primary)] mb-6">Top Spending Categories</h3>
         <div className="space-y-6">
           {dashboardData?.categoryBreakdown?.map((cat, idx) => (
             <div key={idx}>
               <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                  <span className="text-gray-700 font-medium">{cat.name}</span>
+                  <span className="text-[var(--color-text-secondary)] font-medium">{cat.name}</span>
                 </div>
-                <span className="font-bold text-gray-900">${cat.value.toFixed(2)}</span>
+                <span className="font-bold text-[var(--color-text-primary)]">${cat.value.toFixed(2)}</span>
               </div>
-              <div className="h-2 w-full bg-blue-50 rounded-full overflow-hidden">
+              <div className="h-2 w-full bg-blue-50 dark:bg-blue-900/20 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-blue-500 rounded-full"
                   style={{ width: `${(cat.value / (dashboardData.totalExpense || 1)) * 100}%` }}
@@ -274,19 +277,19 @@ export default function Dashboard() {
             </div>
           ))}
           {(!dashboardData?.categoryBreakdown || dashboardData.categoryBreakdown.length === 0) && (
-            <div className="text-gray-400 text-sm text-center">No category data available</div>
+            <div className="text-[var(--color-text-muted)] text-sm text-center">No category data available</div>
           )}
         </div>
       </div>
 
       {/* Recent Transactions List */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h3 className="font-bold text-gray-800 mb-6">Recent Transactions</h3>
+      <div className="bg-[var(--color-bg-secondary)] p-6 rounded-2xl shadow-sm border border-[var(--color-border)]">
+        <h3 className="font-bold text-[var(--color-text-primary)] mb-6">Recent Transactions</h3>
         <div className="space-y-4">
           {dashboardData?.recentTransactions?.map((tx, idx) => (
-            <div key={idx} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl transition-colors">
+            <div key={idx} className="flex items-center justify-between p-3 hover:bg-[var(--color-bg-tertiary)] rounded-xl transition-colors">
               <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-xl ${tx.type === 'INCOME' ? 'bg-green-100' : 'bg-red-100'
+                <div className={`p-3 rounded-xl ${tx.type === 'INCOME' ? 'bg-green-100 dark:bg-green-900/20' : 'bg-red-100 dark:bg-red-900/20'
                   }`}>
                   {tx.type === 'INCOME' ? (
                     <TrendingUp className={`w-5 h-5 ${tx.type === 'INCOME' ? 'text-green-600' : 'text-red-500'
@@ -296,10 +299,10 @@ export default function Dashboard() {
                       }`} />
                   )}
                 </div>
-                <span className="font-medium text-gray-700">{tx.category || tx.description}</span>
+                <span className="font-medium text-[var(--color-text-secondary)]">{tx.category || tx.description}</span>
               </div>
               <div className="text-right">
-                <div className="text-gray-400 text-xs mb-1">
+                <div className="text-[var(--color-text-muted)] text-xs mb-1">
                   {new Date(tx.transactionDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </div>
                 <div className={`font-bold ${tx.type === 'INCOME' ? 'text-green-600' : 'text-red-500'
@@ -310,7 +313,7 @@ export default function Dashboard() {
             </div>
           ))}
           {(!dashboardData?.recentTransactions || dashboardData.recentTransactions.length === 0) && (
-            <div className="text-gray-400 text-sm text-center">No recent transactions</div>
+            <div className="text-[var(--color-text-muted)] text-sm text-center">No recent transactions</div>
           )}
         </div>
       </div>

@@ -47,7 +47,8 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+
+    <div className="min-h-screen bg-gradient-to-br from-[var(--color-bg-primary)] to-[var(--color-bg-secondary)]">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5" />
@@ -63,13 +64,13 @@ export default function LandingPage() {
               <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30">
                 <Wallet className="w-6 h-6 text-white" />
               </div>
-              <span className="text-2xl font-bold text-slate-800">Finance Tracker</span>
+              <span className="text-2xl font-bold text-[var(--color-text-primary)]">Finance Tracker</span>
             </div>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/login')}
-              className="px-6 py-2.5 text-slate-700 hover:text-slate-900 transition-colors"
+              className="px-6 py-2.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
             >
               Sign In
             </motion.button>
@@ -86,20 +87,20 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full mb-6"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-full mb-6"
               >
-                <Sparkles className="w-4 h-4 text-blue-600" />
-                <span className="text-sm text-blue-600 font-medium">Modern Finance Management</span>
+                <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">Modern Finance Management</span>
               </motion.div>
 
-              <h1 className="text-5xl md:text-6xl font-bold text-slate-800 mb-6 leading-tight">
+              <h1 className="text-5xl md:text-6xl font-bold text-[var(--color-text-primary)] mb-6 leading-tight">
                 Take Control of Your
                 <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   Financial Future
                 </span>
               </h1>
 
-              <p className="text-xl text-slate-600 mb-8 leading-relaxed">
+              <p className="text-xl text-[var(--color-text-secondary)] mb-8 leading-relaxed">
                 Track expenses, monitor income, and gain insights into your spending habits with our beautifully simple finance tracker.
               </p>
 
@@ -118,7 +119,7 @@ export default function LandingPage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => navigate('/login')} // Demo points to login for now
-                  className="px-8 py-4 bg-white text-slate-700 rounded-xl shadow-lg shadow-slate-200/50 hover:shadow-xl transition-all"
+                  className="px-8 py-4 bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] border border-[var(--color-border)] rounded-xl shadow-lg shadow-[var(--color-shadow)]/10 hover:shadow-xl transition-all"
                 >
                   View Demo
                 </motion.button>
@@ -131,23 +132,23 @@ export default function LandingPage() {
               transition={{ delay: 0.4 }}
               className="relative"
             >
-              <div className="relative bg-white rounded-3xl shadow-2xl shadow-slate-300/50 p-8">
+              <div className="relative bg-[var(--color-bg-secondary)] rounded-3xl shadow-2xl shadow-slate-300/20 dark:shadow-none p-8 border border-[var(--color-border)]">
                 <div className="space-y-4">
                   {/* Mock Dashboard Cards */}
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-4">
+                    <div className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <TrendingUp className="w-4 h-4 text-green-600" />
-                        <span className="text-xs text-green-700">Income</span>
+                        <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />
+                        <span className="text-xs text-green-700 dark:text-green-300">Income</span>
                       </div>
-                      <p className="text-2xl font-bold text-green-600">$5,420</p>
+                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">$5,420</p>
                     </div>
-                    <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-2xl p-4">
+                    <div className="bg-red-50 dark:bg-red-900/20 rounded-2xl p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <TrendingUp className="w-4 h-4 text-red-600 rotate-180" />
-                        <span className="text-xs text-red-700">Expenses</span>
+                        <TrendingUp className="w-4 h-4 text-red-600 dark:text-red-400 rotate-180" />
+                        <span className="text-xs text-red-700 dark:text-red-300">Expenses</span>
                       </div>
-                      <p className="text-2xl font-bold text-red-500">$3,210</p>
+                      <p className="text-2xl font-bold text-red-500 dark:text-red-400">$3,210</p>
                     </div>
                   </div>
 
@@ -163,14 +164,14 @@ export default function LandingPage() {
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.6 + i * 0.1 }}
-                        className="flex items-center justify-between p-3 bg-slate-50 rounded-xl"
+                        className="flex items-center justify-between p-3 bg-[var(--color-bg-tertiary)] rounded-xl"
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-lg ${transaction.color === 'green' ? 'bg-green-100' : 'bg-red-100'
+                          <div className={`w-8 h-8 rounded-lg ${transaction.color === 'green' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'
                             }`} />
-                          <span className="text-sm font-medium text-slate-700">{transaction.name}</span>
+                          <span className="text-sm font-medium text-[var(--color-text-primary)]">{transaction.name}</span>
                         </div>
-                        <span className={`font-bold ${transaction.color === 'green' ? 'text-green-600' : 'text-red-500'
+                        <span className={`font-bold ${transaction.color === 'green' ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'
                           }`}>
                           {transaction.amount}
                         </span>
@@ -203,10 +204,10 @@ export default function LandingPage() {
             className="mb-32"
           >
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-slate-800 mb-4">
+              <h2 className="text-4xl font-bold text-[var(--color-text-primary)] mb-4">
                 Everything You Need
               </h2>
-              <p className="text-xl text-slate-600">
+              <p className="text-xl text-[var(--color-text-secondary)]">
                 Powerful features to help you manage your finances effortlessly
               </p>
             </div>
@@ -220,15 +221,15 @@ export default function LandingPage() {
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
                   whileHover={{ y: -8 }}
-                  className="bg-white rounded-2xl p-6 shadow-lg shadow-slate-200/50 hover:shadow-xl transition-all"
+                  className="bg-[var(--color-bg-secondary)] rounded-2xl p-6 shadow-lg shadow-slate-200/10 dark:shadow-none border border-[var(--color-border)] hover:shadow-xl transition-all"
                 >
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mb-4">
-                    <feature.icon className="w-6 h-6 text-blue-600" />
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 rounded-xl flex items-center justify-center mb-4">
+                    <feature.icon className="w-6 h-6 text-blue-600 dark:text-blue-300" />
                   </div>
-                  <h3 className="text-lg font-bold text-slate-800 mb-2">
+                  <h3 className="text-lg font-bold text-[var(--color-text-primary)] mb-2">
                     {feature.title}
                   </h3>
-                  <p className="text-slate-600">
+                  <p className="text-[var(--color-text-secondary)]">
                     {feature.description}
                   </p>
                 </motion.div>
@@ -245,10 +246,10 @@ export default function LandingPage() {
             className="mb-32"
           >
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-slate-800 mb-4">
+              <h2 className="text-4xl font-bold text-[var(--color-text-primary)] mb-4">
                 How It Works
               </h2>
-              <p className="text-xl text-slate-600">
+              <p className="text-xl text-[var(--color-text-secondary)]">
                 Start managing your finances in three simple steps
               </p>
             </div>
@@ -267,15 +268,15 @@ export default function LandingPage() {
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl shadow-lg shadow-blue-500/30 mb-6">
                       <span className="text-2xl font-bold text-white">{step.number}</span>
                     </div>
-                    <h3 className="text-xl font-bold text-slate-800 mb-3">
+                    <h3 className="text-xl font-bold text-[var(--color-text-primary)] mb-3">
                       {step.title}
                     </h3>
-                    <p className="text-slate-600">
+                    <p className="text-[var(--color-text-secondary)]">
                       {step.description}
                     </p>
                   </div>
                   {index < steps.length - 1 && (
-                    <div className="hidden md:block absolute top-8 left-2/3 w-1/3 h-0.5 bg-gradient-to-r from-blue-300 to-transparent" />
+                    <div className="hidden md:block absolute top-8 left-2/3 w-1/3 h-0.5 bg-gradient-to-r from-blue-300/30 to-transparent" />
                   )}
                 </motion.div>
               ))}
@@ -310,16 +311,16 @@ export default function LandingPage() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 mt-20">
+      <footer className="border-t border-[var(--color-border)] mt-20">
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
                 <Wallet className="w-4 h-4 text-white" />
               </div>
-              <span className="font-semibold text-slate-700">Finance Tracker</span>
+              <span className="font-semibold text-[var(--color-text-secondary)]">Finance Tracker</span>
             </div>
-            <p className="text-slate-500 text-sm">
+            <p className="text-[var(--color-text-muted)] text-sm">
               © 2026 Finance Tracker. All rights reserved.
             </p>
           </div>

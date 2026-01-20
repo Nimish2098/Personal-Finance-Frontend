@@ -56,16 +56,16 @@ export default function Sidebar({ isOpen, onClose }) {
 
             {/* Sidebar Drawer */}
             <aside
-                className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"
+                className={`fixed top-0 left-0 h-full w-80 bg-[var(--color-bg-secondary)] shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"
                     }`}
             >
-                <div className="flex flex-col h-full">
+                <div className="flex flex-col h-full border-r border-[var(--color-border)]">
                     {/* Header */}
-                    <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                        <h2 className="text-2xl font-bold text-gray-800">Menu</h2>
+                    <div className="flex items-center justify-between p-6 border-b border-[var(--color-border)]">
+                        <h2 className="text-2xl font-bold text-[var(--color-text-primary)]">Menu</h2>
                         <button
                             onClick={onClose}
-                            className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors"
+                            className="p-2 hover:bg-[var(--color-bg-tertiary)] rounded-lg text-[var(--color-text-secondary)] transition-colors"
                         >
                             <X className="w-6 h-6" />
                         </button>
@@ -85,7 +85,7 @@ export default function Sidebar({ isOpen, onClose }) {
                                     onClick={onClose}
                                     className={`flex items-center px-4 py-3.5 rounded-xl transition-all font-medium ${isActive
                                         ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
-                                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                        : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-text-primary)]"
                                         }`}
                                 >
                                     <Icon className={`w-5 h-5 mr-3 ${isActive ? "text-white" : "text-gray-500"}`} />
@@ -94,19 +94,15 @@ export default function Sidebar({ isOpen, onClose }) {
                             )
                         })}
 
-                        <div className="my-6 border-t border-gray-100 mx-2" />
+                        <div className="my-6 border-t border-[var(--color-border)] mx-2" />
 
-                        <div className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                        <div className="px-4 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
                             Quick Actions
                         </div>
 
-
-
-
-
                         <button
                             onClick={handleExportCSV}
-                            className="w-full flex items-center px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors font-medium"
+                            className="w-full flex items-center px-4 py-3 rounded-xl text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)] transition-colors font-medium"
                         >
                             <Download className="w-5 h-5 mr-3 text-gray-500" />
                             Export Data
@@ -114,10 +110,10 @@ export default function Sidebar({ isOpen, onClose }) {
                     </nav>
 
                     {/* Footer / Pro Tip */}
-                    <div className="p-4 border-t border-gray-100">
-                        <div className="bg-blue-50 rounded-2xl p-4">
-                            <h4 className="font-semibold text-gray-900 mb-1">Pro Tip</h4>
-                            <p className="text-sm text-gray-600">
+                    <div className="p-4 border-t border-[var(--color-border)]">
+                        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-4">
+                            <h4 className="font-semibold text-[var(--color-text-primary)] mb-1">Pro Tip</h4>
+                            <p className="text-sm text-[var(--color-text-secondary)]">
                                 Set monthly budgets to track your spending goals and stay on target.
                             </p>
                         </div>

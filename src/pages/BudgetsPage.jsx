@@ -161,22 +161,23 @@ export default function BudgetsPage() {
                     </p>
                   </div>
 
+
                   <div className="relative">
                     <button
                       onClick={() => setActiveMenuId(activeMenuId === budget.id ? null : budget.id)}
-                      className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                      className="p-1 hover:bg-[var(--color-bg-tertiary)] rounded-full transition-colors"
                     >
-                      <MoreVertical className="w-5 h-5 text-gray-500" />
+                      <MoreVertical className="w-5 h-5 text-[var(--color-text-secondary)]" />
                     </button>
 
                     {activeMenuId === budget.id && (
-                      <div className="absolute right-0 top-8 bg-white shadow-xl rounded-lg border border-gray-100 overflow-hidden z-10 min-w-[120px]">
+                      <div className="absolute right-0 top-8 bg-[var(--color-bg-secondary)] shadow-xl rounded-lg border border-[var(--color-border)] overflow-hidden z-10 min-w-[120px]">
                         <button
                           onClick={() => {
                             handleEdit(budget)
                             setActiveMenuId(null)
                           }}
-                          className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 text-left"
+                          className="w-full flex items-center px-4 py-2 text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] text-left"
                         >
                           <Edit2 className="w-4 h-4 mr-2" />
                           Edit
@@ -186,7 +187,7 @@ export default function BudgetsPage() {
                             handleDelete(budget.id)
                             setActiveMenuId(null)
                           }}
-                          className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 text-left"
+                          className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 text-left"
                         >
                           <Trash2 className="w-4 h-4 mr-2" />
                           Delete
@@ -195,57 +196,15 @@ export default function BudgetsPage() {
                     )}
                   </div>
                 </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-[var(--color-text-secondary)]">Budget</span>
-                    <span className="text-[var(--color-text-primary)] font-semibold">
-                      ${budget.budgetAmount.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-[var(--color-text-secondary)]">Spent</span>
-                    <span
-                      className={`font-semibold ${isOverBudget
-                        ? "text-[var(--color-error)]"
-                        : "text-[var(--color-text-primary)]"
-                        }`}
-                    >
-                      ${budget.spentAmount.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="h-2 rounded-full bg-[var(--color-bg-tertiary)] overflow-hidden">
-                    <div
-                      className={`h-full transition-all ${isOverBudget
-                        ? "bg-[var(--color-error)]"
-                        : percentage > 80
-                          ? "bg-[var(--color-primary)]"
-                          : "bg-[var(--color-success)]"
-                        }`}
-                      style={{ width: `${Math.min(percentage, 100)}%` }}
-                    />
-                  </div>
-                  <div className="text-xs text-[var(--color-text-muted)] text-right">
-                    {percentage.toFixed(1)}% used
-                  </div>
-                </div>
               </Card>
             )
           })}
         </div>
 
-        {
-          budgets.length === 0 && (
-            <div className="text-center py-12 text-[var(--color-text-muted)]">
-              No budgets set. Click "Add Budget" to create one.
-            </div>
-          )
-        }
-
         <Modal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
-          title={editingBudget ? "Edit Budget" : "Add New Budget"}
+          title={editingBudget ? "Update Budget" : "Create Budget"}
         >
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -257,30 +216,17 @@ export default function BudgetsPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, categoryId: e.target.value })
                 }
-                className="w-full px-4 py-2 bg-white border border-[var(--color-bg-tertiary)] rounded-sm text-black focus:outline-none focus:border-[var(--color-primary)]"
+                className="w-full px-4 py-2 bg-[var(--color-bg-primary)] border border-[var(--color-bg-tertiary)] rounded-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-primary)]"
                 required
               >
                 <option value="">Select a category</option>
                 {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
+                  <option key={cat.id} value={cat.id} className="text-black">
                     {cat.name}
                   </option>
                 ))}
               </select>
             </div>
-
-            <Input
-              label="Budget Amount"
-              type="number"
-              step="0.01"
-              min="0"
-              value={formData.amount}
-              onChange={(e) =>
-                setFormData({ ...formData, amount: e.target.value })
-              }
-              placeholder="0.00"
-              required
-            />
 
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -292,11 +238,11 @@ export default function BudgetsPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, month: parseInt(e.target.value) })
                   }
-                  className="w-full px-4 py-2 bg-white border border-[var(--color-bg-tertiary)] rounded-sm text-black focus:outline-none focus:border-[var(--color-primary)]"
+                  className="w-full px-4 py-2 bg-[var(--color-bg-primary)] border border-[var(--color-bg-tertiary)] rounded-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-primary)]"
                   required
                 >
                   {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                    <option key={m} value={m}>
+                    <option key={m} value={m} className="text-black">
                       {new Date(2000, m - 1).toLocaleDateString("en-US", {
                         month: "long",
                       })}
@@ -304,6 +250,7 @@ export default function BudgetsPage() {
                   ))}
                 </select>
               </div>
+
 
               <div>
                 <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
