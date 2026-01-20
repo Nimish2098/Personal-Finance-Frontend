@@ -1,87 +1,129 @@
 "use client"
+import { Link, useLocation } from "react-router-dom"
+import {
+    LayoutDashboard,
+    TrendingUp,
+    Target,
+    FileText,
+    Calendar,
+    Settings,
+    LogOut,
+    X,
+    Download,
+    Wallet, // Imported Wallet icon
+    Tag // Import Tag icon
+} from "lucide-react"
+import { transactionService } from "../services/transactions"
 
-import { Link, useLocation, useNavigate } from "react-router-dom"
-import { useAuth } from "../context/AuthContext"
-import { LayoutDashboard, Wallet, Layers, ArrowLeftRight, LogOut, Hexagon, Target } from "lucide-react"
-
-export default function Sidebar() {
-    const navigate = useNavigate()
+export default function Sidebar({ isOpen, onClose }) {
     const location = useLocation()
-    const { logout } = useAuth()
-
-    const handleLogout = () => {
-        logout()
-        navigate("/")
-    }
 
     const navLinks = [
         { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
         { path: "/accounts", label: "Accounts", icon: Wallet },
-        { path: "/categories", label: "Categories", icon: Layers },
-        { path: "/transactions", label: "Transactions", icon: ArrowLeftRight },
+        { path: "/analytics", label: "Analytics", icon: TrendingUp },
+        { path: "/categories", label: "Categories", icon: Tag }, // Add Categories link
         { path: "/budgets", label: "Budgets", icon: Target },
+        { path: "/reports", label: "Reports", icon: FileText },
+        { path: "/calendar", label: "Calendar View", icon: Calendar },
+        { path: "/settings", label: "Settings", icon: Settings },
     ]
 
+    const handleExportCSV = async () => {
+        try {
+            const blob = await transactionService.exportCSV()
+            const url = window.URL.createObjectURL(blob)
+            const link = document.createElement("a")
+            link.href = url
+            link.setAttribute("download", "transactions.csv")
+            document.body.appendChild(link)
+            link.click()
+            link.parentNode.removeChild(link)
+        } catch (err) {
+            console.error("Failed to export transactions", err)
+        }
+    }
+
     return (
-        <aside className="fixed left-0 top-0 h-screen w-64 flex flex-col border-r border-white/10 bg-[var(--color-bg-primary)]/80 backdrop-blur-md shadow-[4px_0_24px_-4px_rgba(0,0,0,0.5)] z-50">
-            {/* Header / Logo */}
-            <div className="h-16 flex items-center px-6 border-b border-white/5 bg-gradient-to-r from-transparent to-[var(--color-bg-secondary)] relative overflow-hidden">
-                {/* Decorative corner */}
-                <div className="absolute top-0 right-0 p-1">
-                    <div className="w-2 h-2 bg-[var(--color-primary)] opacity-50"></div>
-                </div>
-                <Hexagon className="w-6 h-6 text-[var(--color-primary)] mr-3 animate-pulse-slow" />
-                <span className="text-xl font-bold tracking-wider text-white uppercase" style={{ textShadow: "0 0 10px var(--color-primary)" }}>
-                    FinTrack
-                </span>
-            </div>
+        <>
+            {/* Backdrop */}
+            {isOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity"
+                    onClick={onClose}
+                />
+            )}
 
-            {/* Navigation Links */}
-            <div className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
-                {navLinks.map((link) => {
-                    const isActive = location.pathname === link.path
-                    const Icon = link.icon
-
-                    return (
-                        <Link
-                            key={link.path}
-                            to={link.path}
-                            className={`group flex items-center px-3 py-3 rounded-r transition-all duration-300 relative overflow-hidden ${isActive
-                                ? "text-[var(--color-primary)] bg-white/5 border-l-2 border-[var(--color-primary)]"
-                                : "text-[var(--color-text-secondary)] hover:text-white hover:bg-white/5 border-l-2 border-transparent hover:border-white/20"
-                                }`}
+            {/* Sidebar Drawer */}
+            <aside
+                className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"
+                    }`}
+            >
+                <div className="flex flex-col h-full">
+                    {/* Header */}
+                    <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                        <h2 className="text-2xl font-bold text-gray-800">Menu</h2>
+                        <button
+                            onClick={onClose}
+                            className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors"
                         >
-                            {/* Active glow background */}
-                            {isActive && (
-                                <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-primary)]/10 to-transparent pointer-events-none" />
-                            )}
+                            <X className="w-6 h-6" />
+                        </button>
+                    </div>
 
-                            <Icon className={`w-5 h-5 mr-3 transition-transform duration-300 ${isActive ? "scale-110 drop-shadow-[0_0_5px_var(--color-primary)]" : "group-hover:scale-110"}`} />
-                            <span className={`font-medium tracking-wide ${isActive ? "text-shadow-neon" : ""}`}>
-                                {link.label}
-                            </span>
+                    {/* Navigation */}
+                    <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+                        {/* Highlights: Blue button style for active */}
+                        {navLinks.map((link) => {
+                            const isActive = location.pathname === link.path
+                            const Icon = link.icon
 
-                            {/* Tech-decal on hover */}
-                            <div className={`absolute right-2 w-1 h-1 bg-[var(--color-primary)] rounded-full opacity-0 transition-opacity duration-300 ${isActive ? 'opacity-100' : 'group-hover:opacity-100'}`} />
-                        </Link>
-                    )
-                })}
-            </div>
+                            return (
+                                <Link
+                                    key={link.path}
+                                    to={link.path}
+                                    onClick={onClose}
+                                    className={`flex items-center px-4 py-3.5 rounded-xl transition-all font-medium ${isActive
+                                        ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
+                                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                        }`}
+                                >
+                                    <Icon className={`w-5 h-5 mr-3 ${isActive ? "text-white" : "text-gray-500"}`} />
+                                    {link.label}
+                                </Link>
+                            )
+                        })}
 
-            {/* Footer / User Info */}
-            <div className="p-4 border-t border-white/5 bg-[var(--color-bg-secondary)]/30">
-                <div className="flex items-center justify-between mb-2">
-                    <div className="text-xs text-[var(--color-text-muted)] font-mono uppercase">System Online</div>
-                    <div className="h-1.5 w-1.5 rounded-full bg-[var(--color-success)] animate-pulse"></div>
+                        <div className="my-6 border-t border-gray-100 mx-2" />
+
+                        <div className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                            Quick Actions
+                        </div>
+
+
+
+
+
+                        <button
+                            onClick={handleExportCSV}
+                            className="w-full flex items-center px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors font-medium"
+                        >
+                            <Download className="w-5 h-5 mr-3 text-gray-500" />
+                            Export Data
+                        </button>
+                    </nav>
+
+                    {/* Footer / Pro Tip */}
+                    <div className="p-4 border-t border-gray-100">
+                        <div className="bg-blue-50 rounded-2xl p-4">
+                            <h4 className="font-semibold text-gray-900 mb-1">Pro Tip</h4>
+                            <p className="text-sm text-gray-600">
+                                Set monthly budgets to track your spending goals and stay on target.
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center justify-center px-4 py-2 rounded border border-[var(--color-error)]/30 text-[var(--color-error)] text-sm font-medium hover:bg-[var(--color-error)] hover:text-white transition-all duration-300 hover:shadow-[0_0_15px_rgba(239,68,68,0.4)]"
-                >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    DISCONNECT
-                </button>
-            </div>
-        </aside>
+            </aside>
+        </>
     )
 }

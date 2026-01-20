@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { MoreVertical, Edit2, Trash2 } from "lucide-react" // Import icons
 import Card from "../components/Card"
 import Button from "../components/Button"
 import Input from "../components/Input"
@@ -15,6 +16,7 @@ export default function BudgetsPage() {
   const [error, setError] = useState("")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingBudget, setEditingBudget] = useState(null)
+  const [activeMenuId, setActiveMenuId] = useState(null) // NEW State
   const [formData, setFormData] = useState({
     categoryId: "",
     amount: "",
@@ -146,7 +148,7 @@ export default function BudgetsPage() {
 
             return (
               <Card key={budget.id}>
-                <div className="flex justify-between items-start mb-4">
+                <div className="flex justify-between items-start mb-4 relative">
                   <div>
                     <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">
                       {budget.categoryName}
@@ -158,19 +160,39 @@ export default function BudgetsPage() {
                       })}
                     </p>
                   </div>
-                  <div className="flex gap-2">
+
+                  <div className="relative">
                     <button
-                      onClick={() => handleEdit(budget)}
-                      className="text-[var(--color-primary)] hover:underline text-sm"
+                      onClick={() => setActiveMenuId(activeMenuId === budget.id ? null : budget.id)}
+                      className="p-1 hover:bg-gray-100 rounded-full transition-colors"
                     >
-                      Edit
+                      <MoreVertical className="w-5 h-5 text-gray-500" />
                     </button>
-                    <button
-                      onClick={() => handleDelete(budget.id)}
-                      className="text-[var(--color-error)] hover:underline text-sm"
-                    >
-                      Delete
-                    </button>
+
+                    {activeMenuId === budget.id && (
+                      <div className="absolute right-0 top-8 bg-white shadow-xl rounded-lg border border-gray-100 overflow-hidden z-10 min-w-[120px]">
+                        <button
+                          onClick={() => {
+                            handleEdit(budget)
+                            setActiveMenuId(null)
+                          }}
+                          className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 text-left"
+                        >
+                          <Edit2 className="w-4 h-4 mr-2" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => {
+                            handleDelete(budget.id)
+                            setActiveMenuId(null)
+                          }}
+                          className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 text-left"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -185,8 +207,8 @@ export default function BudgetsPage() {
                     <span className="text-[var(--color-text-secondary)]">Spent</span>
                     <span
                       className={`font-semibold ${isOverBudget
-                          ? "text-[var(--color-error)]"
-                          : "text-[var(--color-text-primary)]"
+                        ? "text-[var(--color-error)]"
+                        : "text-[var(--color-text-primary)]"
                         }`}
                     >
                       ${budget.spentAmount.toFixed(2)}
@@ -195,10 +217,10 @@ export default function BudgetsPage() {
                   <div className="h-2 rounded-full bg-[var(--color-bg-tertiary)] overflow-hidden">
                     <div
                       className={`h-full transition-all ${isOverBudget
-                          ? "bg-[var(--color-error)]"
-                          : percentage > 80
-                            ? "bg-[var(--color-primary)]"
-                            : "bg-[var(--color-success)]"
+                        ? "bg-[var(--color-error)]"
+                        : percentage > 80
+                          ? "bg-[var(--color-primary)]"
+                          : "bg-[var(--color-success)]"
                         }`}
                       style={{ width: `${Math.min(percentage, 100)}%` }}
                     />
@@ -212,11 +234,13 @@ export default function BudgetsPage() {
           })}
         </div>
 
-        {budgets.length === 0 && (
-          <div className="text-center py-12 text-[var(--color-text-muted)]">
-            No budgets set. Click "Add Budget" to create one.
-          </div>
-        )}
+        {
+          budgets.length === 0 && (
+            <div className="text-center py-12 text-[var(--color-text-muted)]">
+              No budgets set. Click "Add Budget" to create one.
+            </div>
+          )
+        }
 
         <Modal
           isOpen={isModalOpen}

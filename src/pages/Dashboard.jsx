@@ -1,560 +1,316 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Card from "../components/Card"
+import { Link } from "react-router-dom"
+import { accountService } from "../services/accounts" // Add Import
+
+
 import { transactionService } from "../services/transactions"
-import { budgetService } from "../services/budgets"
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
+  CartesianGrid,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
-  Area,
-  AreaChart,
+  Legend
 } from "recharts"
+import { Wallet, TrendingUp, TrendingDown, Calendar, DollarSign, Plus } from "lucide-react"
 
-const COLORS = ["#14b8a6", "#8b5cf6", "#3b82f6", "#f59e0b", "#ef4444"]
+const COLORS = ["#3b82f6", "#e2e8f0"] // Blue and Light Slate for the Pie chart as per design
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState(null)
   const [monthlySummary, setMonthlySummary] = useState(null)
-  const [trendsData, setTrendsData] = useState(null)
-  const [cashFlowData, setCashFlowData] = useState(null)
-  const [trendPeriod, setTrendPeriod] = useState("monthly") // "daily", "weekly", "monthly"
-  const [budgetOverview, setBudgetOverview] = useState(null)
+  const [trendsData, setTrendsData] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
 
   useEffect(() => {
-    const now = new Date()
-    const month = now.getMonth() + 1
-    const year = now.getFullYear()
-
     const fetchData = async () => {
       try {
-        setLoading(true)
-        setError("")
+        const now = new Date()
+        const month = now.getMonth() + 1
+        const year = now.getFullYear()
 
-        const results = await Promise.allSettled([
+        const [dashboard, summary, trends, recentTx] = await Promise.all([
           transactionService.getDashboardData(month, year),
           transactionService.getMonthlySummary(month, year),
-          transactionService.getSpendingTrends(trendPeriod, year, month),
-          transactionService.getCashFlowAnalysis(month, year),
-          budgetService.getBudgetOverview(month, year),
+          transactionService.getSpendingTrends("monthly", year, month),
+          transactionService.getTransactions(0, 5) // Fetch 5 recent transactions
         ])
 
-
-        const [dashboardResult, summaryResult, trendsResult, cashFlowResult, budgetsResult] = results
-        // const budgetsResult = { status: "rejected", reason: "Disabled" } // Fallback
-
-        // Log errors for debugging
-        results.forEach((result, index) => {
-          if (result.status === "rejected") {
-            const endpoints = ["Dashboard", "Summary", "Trends", "CashFlow", "Budgets"]
-            console.error(`Failed to load ${endpoints[index]}:`, result.reason)
-          }
+        // Merge recent transactions into dashboard data
+        setDashboardData({
+          ...dashboard,
+          recentTransactions: recentTx.content || []
         })
+        setMonthlySummary(summary)
 
-        // Set data if successful, otherwise keep null
-        if (dashboardResult.status === "fulfilled" && dashboardResult.value) {
-          setDashboardData(dashboardResult.value)
+        // Transform trends data for the line chart (dummy structure or real data adaptation)
+        // If API returns array, map it. Otherwise mock for visualization if empty
+        if (Array.isArray(trends) && trends.length > 0) {
+          setTrendsData(trends)
         } else {
-          console.error("Dashboard data failed:", dashboardResult?.reason);
-          setError(prev => prev + (prev ? " | " : "") + "Failed to load dashboard data");
+          // Mock data to match screenshot structure if no real data
+          const mockTrends = [
+            { period: 'Jan', income: 0, expense: 0 },
+            // ... populate as needed based on real data flow later
+            { period: 'Jan', income: dashboard?.totalIncome || 0, expense: dashboard?.totalExpense || 0 }
+          ]
+          setTrendsData(mockTrends)
         }
-
-        if (summaryResult.status === "fulfilled" && summaryResult.value) {
-          setMonthlySummary(summaryResult.value)
-        }
-
-        if (trendsResult.status === "fulfilled" && Array.isArray(trendsResult.value)) {
-          setTrendsData(trendsResult.value)
-        }
-
-        if (cashFlowResult.status === "fulfilled" && cashFlowResult.value) {
-          setCashFlowData(cashFlowResult.value)
-        }
-
-        if (budgetsResult.status === "fulfilled" && Array.isArray(budgetsResult.value)) {
-          setBudgetOverview(budgetsResult.value)
-        } else if (budgetsResult.status === "fulfilled") {
-          console.warn("Budget data is not an array:", budgetsResult.value)
-        }
-
-      } catch (err) {
-        setError("Unexpected error occurred")
-        console.error("Critical dashboard error:", err)
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error)
       } finally {
         setLoading(false)
       }
     }
-
     fetchData()
-  }, [trendPeriod])
+  }, [])
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--color-primary)]"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     )
   }
 
+  // Calculate savings rate
+  const savingsRate = dashboardData?.totalIncome > 0
+    ? ((dashboardData.totalIncome - dashboardData.totalExpense) / dashboardData.totalIncome) * 100
+    : 0
+
   return (
-    <div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page header */}
-        <div className="flex items-start justify-between gap-4 mb-8">
+    <div className="p-4 md:p-8 space-y-8">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-blue-600 rounded-xl shadow-lg shadow-blue-500/20">
+            <Wallet className="w-8 h-8 text-white" />
+          </div>
           <div>
-            <h1 className="text-2xl font-semibold text-[var(--color-text-primary)]">
-              Dashboard
-            </h1>
-            <p className="text-sm text-[var(--color-text-muted)]">
-              Welcome back! Here&apos;s your financial overview.
-            </p>
+            <h1 className="text-2xl font-bold text-gray-900">Finance Tracker</h1>
+            <p className="text-gray-500 text-sm">Manage your money with ease</p>
           </div>
-          <button className="inline-flex items-center px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white text-sm font-medium shadow-md hover:shadow-lg hover:bg-opacity-90 transition">
-            + Add Transaction
-          </button>
+        </div>
+        <Link to="/transactions" className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-500/30 font-medium hover:bg-blue-700 transition-colors">
+          <Plus className="w-5 h-5 mr-2" />
+          Add Transaction
+        </Link>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        {/* Balance */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <div className="flex justify-between items-start mb-4">
+            <span className="text-gray-500 text-sm">Total Balance</span>
+            <div className="p-2 bg-gray-100 rounded-lg">
+              <DollarSign className="w-5 h-5 text-gray-600" />
+            </div>
+          </div>
+          <div className={`text-2xl font-bold mb-2 ${(dashboardData?.totalBalance || 0) < 0 ? 'text-red-500' : 'text-gray-900'
+            }`}>
+            ${(dashboardData?.totalBalance || 0).toFixed(2)}
+          </div>
+          <div className="text-xs font-medium text-green-500">
+            +{savingsRate.toFixed(1)}% savings rate
+          </div>
         </div>
 
-        {error && (
-          <div className="bg-[var(--color-error)] bg-opacity-10 border border-[var(--color-error)] text-[var(--color-error)] px-4 py-3 rounded-lg mb-6">
-            {error}
+        {/* Income */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <div className="flex justify-between items-start mb-4">
+            <span className="text-gray-500 text-sm">Total Income</span>
+            <div className="p-2 bg-green-100 rounded-lg">
+              <TrendingUp className="w-5 h-5 text-green-600" />
+            </div>
           </div>
-        )}
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <div className="text-[var(--color-text-muted)] text-xs uppercase tracking-wide mb-1">
-              Total Balance
-            </div>
-            <div className="text-3xl font-bold text-[var(--color-text-primary)]">
-              ${dashboardData?.totalBalance ?? dashboardData?.netSavings ?? 0}
-            </div>
-          </Card>
-          <Card>
-            <div className="text-[var(--color-text-muted)] text-xs uppercase tracking-wide mb-1">
-              Income
-            </div>
-            <div className="text-3xl font-bold text-[var(--color-success)]">
-              ${dashboardData?.totalIncome || 0}
-            </div>
-          </Card>
-          <Card>
-            <div className="text-[var(--color-text-muted)] text-xs uppercase tracking-wide mb-1">
-              Expenses
-            </div>
-            <div className="text-3xl font-bold text-[var(--color-error)]">
-              ${dashboardData?.totalExpense || 0}
-            </div>
-          </Card>
-          <Card>
-            <div className="text-[var(--color-text-muted)] text-xs uppercase tracking-wide mb-1">
-              Savings
-            </div>
-            <div className="text-3xl font-bold text-[var(--color-primary)]">
-              ${dashboardData?.netSavings || 0}
-            </div>
-          </Card>
+          <div className="text-2xl font-bold text-green-600 mb-2">
+            ${(dashboardData?.totalIncome || 0).toFixed(2)}
+          </div>
+          <div className="text-xs text-gray-400">
+            <Calendar className="w-3 h-3 inline mr-1" />
+            All time
+          </div>
         </div>
 
-        {/* Spending Trends Over Time */}
-        <Card className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">
-                Spending Trends Over Time
-              </h3>
-              <p className="text-xs text-[var(--color-text-muted)]">
-                Track your income and expenses across different periods
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setTrendPeriod("daily")}
-                className={`px-3 py-1 rounded text-xs ${trendPeriod === "daily"
-                  ? "bg-[var(--color-primary)] text-white"
-                  : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
-                  }`}
-              >
-                Daily
-              </button>
-              <button
-                onClick={() => setTrendPeriod("weekly")}
-                className={`px-3 py-1 rounded text-xs ${trendPeriod === "weekly"
-                  ? "bg-[var(--color-primary)] text-white"
-                  : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
-                  }`}
-              >
-                Weekly
-              </button>
-              <button
-                onClick={() => setTrendPeriod("monthly")}
-                className={`px-3 py-1 rounded text-xs ${trendPeriod === "monthly"
-                  ? "bg-[var(--color-primary)] text-white"
-                  : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]"
-                  }`}
-              >
-                Monthly
-              </button>
+        {/* Expenses */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <div className="flex justify-between items-start mb-4">
+            <span className="text-gray-500 text-sm">Total Expenses</span>
+            <div className="p-2 bg-red-100 rounded-lg">
+              <TrendingDown className="w-5 h-5 text-red-500" />
             </div>
           </div>
-          {trendsData && trendsData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={350}>
-              <AreaChart data={trendsData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-bg-tertiary)" />
-                <XAxis dataKey="period" stroke="var(--color-text-muted)" />
-                <YAxis stroke="var(--color-text-muted)" />
-                <Tooltip />
-                <Legend />
-                <Area
+          <div className="text-2xl font-bold text-red-500 mb-0">
+            ${(dashboardData?.totalExpense || 0).toFixed(2)}
+          </div>
+        </div>
+
+        {/* Transactions Count */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <div className="flex justify-between items-start mb-4">
+            <span className="text-gray-500 text-sm">Transactions</span>
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Calendar className="w-5 h-5 text-blue-600" />
+            </div>
+          </div>
+          <div className="text-2xl font-bold text-gray-900 mb-2">
+            {dashboardData?.recentTransactions?.length || 0}
+          </div>
+          <div className="text-xs text-gray-400">
+            Avg: ${((dashboardData?.totalExpense || 0) / (dashboardData?.recentTransactions?.length || 1)).toFixed(2)}
+          </div>
+        </div>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Monthly Trend */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h3 className="font-bold text-gray-800 mb-6">Monthly Trend</h3>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={trendsData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis
+                  dataKey="period"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#94a3b8', fontSize: 12 }}
+                  dy={10}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#94a3b8', fontSize: 12 }}
+                />
+                <Tooltip
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                />
+                <Legend iconType="circle" />
+                <Line
                   type="monotone"
                   dataKey="income"
-                  stackId="1"
-                  stroke="var(--color-success)"
-                  fill="var(--color-success)"
-                  fillOpacity={0.6}
+                  name="Income"
+                  stroke="#10b981"
+                  strokeWidth={2}
+                  dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}
+                  activeDot={{ r: 6 }}
                 />
-                <Area
+                <Line
                   type="monotone"
                   dataKey="expense"
-                  stackId="1"
-                  stroke="var(--color-error)"
-                  fill="var(--color-error)"
-                  fillOpacity={0.6}
+                  name="Expenses"
+                  stroke="#ef4444"
+                  strokeWidth={2}
+                  dot={{ r: 4, fill: '#ef4444', strokeWidth: 2, stroke: '#fff' }}
+                  activeDot={{ r: 6 }}
                 />
-              </AreaChart>
+              </LineChart>
             </ResponsiveContainer>
-          ) : (
-            <div className="text-center py-8 text-[var(--color-text-muted)]">
-              No trend data available
-            </div>
-          )}
-        </Card>
-
-        {/* Charts Row: Income vs Expenses + Category Breakdown */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          {/* Enhanced Income vs Expenses */}
-          {monthlySummary && (
-            <Card>
-              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-1">
-                Income vs Expenses Summary
-              </h3>
-              <p className="text-xs text-[var(--color-text-muted)] mb-4">
-                Current month comparison
-              </p>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={[monthlySummary]}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-bg-tertiary)" />
-                  <XAxis dataKey="name" stroke="var(--color-text-muted)" />
-                  <YAxis stroke="var(--color-text-muted)" />
-                  <Tooltip
-                    content={({ active, payload, label }) => {
-                      if (active && payload && payload.length) {
-                        return (
-                          <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-bg-tertiary)] p-2 rounded shadow-lg">
-                            <p className="text-[var(--color-text-primary)] font-semibold mb-1">{label}</p>
-                            {payload.map((entry, index) => (
-                              <div key={index} className="text-sm" style={{ color: entry.color }}>
-                                {entry.name}: ${entry.value}
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                    cursor={{ fill: 'var(--color-bg-tertiary)', opacity: 0.4 }}
-                  />
-                  <Legend />
-                  <Bar dataKey="income" fill="var(--color-success)" />
-                  <Bar dataKey="expense" fill="var(--color-error)" />
-                </BarChart>
-              </ResponsiveContainer>
-            </Card>
-          )}
-
-          {/* Category Breakdown - Pie Chart */}
-          {dashboardData?.categoryBreakdown && (
-            <Card>
-              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-1">
-                Spending by Category
-              </h3>
-              <p className="text-xs text-[var(--color-text-muted)] mb-4">
-                Current month breakdown
-              </p>
-              <div className="flex flex-col lg:flex-row items-center gap-6">
-                <div className="flex-1">
-                  <ResponsiveContainer width="100%" height={260}>
-                    <PieChart>
-                      <Pie
-                        data={dashboardData.categoryBreakdown}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {dashboardData.categoryBreakdown.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="w-full lg:w-40 space-y-2 text-xs">
-                  {dashboardData.categoryBreakdown.map((entry, idx) => (
-                    <div
-                      key={idx}
-                      className="flex justify-between items-center"
-                    >
-                      <span className="flex items-center gap-2">
-                        <span
-                          className="inline-block w-2 h-2 rounded-full"
-                          style={{ backgroundColor: COLORS[idx % COLORS.length] }}
-                        />
-                        <span className="text-[var(--color-text-secondary)]">
-                          {entry.name}
-                        </span>
-                      </span>
-                      <span className="text-[var(--color-text-primary)]">
-                        ${entry.value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Card>
-          )}
+          </div>
         </div>
 
-        {/* Category Breakdown - Bar Chart View */}
-        {dashboardData?.categoryBreakdown && (
-          <Card className="mb-8">
-            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-1">
-              Category-wise Spending Breakdown
-            </h3>
-            <p className="text-xs text-[var(--color-text-muted)] mb-4">
-              Detailed view of expenses by category
-            </p>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={dashboardData.categoryBreakdown}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-bg-tertiary)" />
-                <XAxis dataKey="name" stroke="var(--color-text-muted)" />
-                <YAxis stroke="var(--color-text-muted)" />
+        {/* Expense Breakdown */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h3 className="font-bold text-gray-800 mb-6">Expense Breakdown</h3>
+          <div className="h-[300px] w-full flex items-center justify-center">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={dashboardData?.categoryBreakdown || []}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  paddingAngle={0}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {(dashboardData?.categoryBreakdown || []).map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
                 <Tooltip />
-                <Bar dataKey="value" fill="var(--color-primary)" />
-              </BarChart>
+                <Legend
+                  layout="vertical"
+                  verticalAlign="middle"
+                  align="left"
+                  iconType="circle"
+                />
+              </PieChart>
             </ResponsiveContainer>
-          </Card>
-        )}
+          </div>
+        </div>
+      </div>
 
-        {/* Cash Flow Analysis */}
-        {cashFlowData && (
-          <Card className="mb-8">
-            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-1">
-              Cash Flow Analysis
-            </h3>
-            <p className="text-xs text-[var(--color-text-muted)] mb-4">
-              Track your daily cash flow and balance
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-              <div>
-                <div className="text-xs text-[var(--color-text-muted)]">Opening Balance</div>
-                <div className="text-lg font-semibold text-[var(--color-text-primary)]">
-                  ${cashFlowData.openingBalance || 0}
+      {/* Top Categories Progress */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h3 className="font-bold text-gray-800 mb-6">Top Spending Categories</h3>
+        <div className="space-y-6">
+          {dashboardData?.categoryBreakdown?.map((cat, idx) => (
+            <div key={idx}>
+              <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <span className="text-gray-700 font-medium">{cat.name}</span>
                 </div>
+                <span className="font-bold text-gray-900">${cat.value.toFixed(2)}</span>
               </div>
-              <div>
-                <div className="text-xs text-[var(--color-text-muted)]">Total Inflow</div>
-                <div className="text-lg font-semibold text-[var(--color-success)]">
-                  ${cashFlowData.totalInflow || 0}
+              <div className="h-2 w-full bg-blue-50 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-blue-500 rounded-full"
+                  style={{ width: `${(cat.value / (dashboardData.totalExpense || 1)) * 100}%` }}
+                />
+              </div>
+            </div>
+          ))}
+          {(!dashboardData?.categoryBreakdown || dashboardData.categoryBreakdown.length === 0) && (
+            <div className="text-gray-400 text-sm text-center">No category data available</div>
+          )}
+        </div>
+      </div>
+
+      {/* Recent Transactions List */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h3 className="font-bold text-gray-800 mb-6">Recent Transactions</h3>
+        <div className="space-y-4">
+          {dashboardData?.recentTransactions?.map((tx, idx) => (
+            <div key={idx} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl transition-colors">
+              <div className="flex items-center gap-4">
+                <div className={`p-3 rounded-xl ${tx.type === 'INCOME' ? 'bg-green-100' : 'bg-red-100'
+                  }`}>
+                  {tx.type === 'INCOME' ? (
+                    <TrendingUp className={`w-5 h-5 ${tx.type === 'INCOME' ? 'text-green-600' : 'text-red-500'
+                      }`} />
+                  ) : (
+                    <TrendingDown className={`w-5 h-5 ${tx.type === 'INCOME' ? 'text-green-600' : 'text-red-500'
+                      }`} />
+                  )}
                 </div>
+                <span className="font-medium text-gray-700">{tx.category || tx.description}</span>
               </div>
-              <div>
-                <div className="text-xs text-[var(--color-text-muted)]">Total Outflow</div>
-                <div className="text-lg font-semibold text-[var(--color-error)]">
-                  ${cashFlowData.totalOutflow || 0}
+              <div className="text-right">
+                <div className="text-gray-400 text-xs mb-1">
+                  {new Date(tx.transactionDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </div>
-              </div>
-              <div>
-                <div className="text-xs text-[var(--color-text-muted)]">Closing Balance</div>
-                <div className="text-lg font-semibold text-[var(--color-text-primary)]">
-                  ${cashFlowData.closingBalance || 0}
+                <div className={`font-bold ${tx.type === 'INCOME' ? 'text-green-600' : 'text-red-500'
+                  }`}>
+                  {tx.type === 'INCOME' ? '+' : '-'}${Math.abs(tx.amount).toFixed(2)}
                 </div>
               </div>
             </div>
-            {cashFlowData.dailyFlow && cashFlowData.dailyFlow.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={cashFlowData.dailyFlow}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-bg-tertiary)" />
-                  <XAxis dataKey="date" stroke="var(--color-text-muted)" />
-                  <YAxis stroke="var(--color-text-muted)" />
-                  <Tooltip />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="inflow"
-                    stroke="var(--color-success)"
-                    name="Inflow"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="outflow"
-                    stroke="var(--color-error)"
-                    name="Outflow"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="balance"
-                    stroke="var(--color-primary)"
-                    name="Balance"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="text-center py-8 text-[var(--color-text-muted)]">
-                No cash flow data available
-              </div>
-            )}
-          </Card>
-        )}
-
-        {/* Bottom section: Recent Transactions + Budget Overview */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {dashboardData?.recentTransactions && (
-            <Card>
-              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">
-                Recent Transactions
-              </h3>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-[var(--color-bg-tertiary)]">
-                      <th className="text-left py-2 text-[var(--color-text-muted)] font-medium">
-                        Date
-                      </th>
-                      <th className="text-left py-2 text-[var(--color-text-muted)] font-medium">
-                        Description
-                      </th>
-                      <th className="text-left py-2 text-[var(--color-text-muted)] font-medium">
-                        Category
-                      </th>
-                      <th className="text-right py-2 text-[var(--color-text-muted)] font-medium">
-                        Amount
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {dashboardData.recentTransactions.map((tx, idx) => (
-                      <tr
-                        key={idx}
-                        className="border-b border-[var(--color-bg-tertiary)] hover:bg-[var(--color-bg-tertiary)] transition-colors"
-                      >
-                        <td className="py-3 text-[var(--color-text-secondary)]">
-                          {new Date(tx.transactionDate).toLocaleDateString()}
-                        </td>
-                        <td className="py-3 text-[var(--color-text-primary)]">
-                          {tx.description}
-                        </td>
-                        <td className="py-3 text-[var(--color-text-secondary)]">
-                          {tx.category}
-                        </td>
-                        <td
-                          className={`py-3 text-right font-semibold ${tx.type === "INCOME"
-                            ? "text-[var(--color-success)]"
-                            : "text-[var(--color-error)]"
-                            }`}
-                        >
-                          {tx.type === "INCOME" ? "+" : "-"}${Math.abs(tx.amount)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </Card>
-          )}
-
-          {budgetOverview && budgetOverview.length > 0 ? (
-            <Card>
-              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
-                Budget Overview
-              </h3>
-              <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                Track your spending limits.
-              </p>
-              <div className="space-y-4 text-sm">
-                {budgetOverview.map((budget, idx) => {
-                  // Handle both limitAmount (from BudgetStatusDTO) and budgetAmount
-                  const budgetAmount = budget.limitAmount || budget.budgetAmount || 0
-                  const spentAmount = budget.spentAmount || 0
-                  const percentage = budget.percentageUsed !== undefined
-                    ? budget.percentageUsed
-                    : budgetAmount > 0
-                      ? (spentAmount / budgetAmount) * 100
-                      : 0
-                  const isOverBudget = budget.isExceeded !== undefined
-                    ? budget.isExceeded
-                    : percentage > 100
-
-                  return (
-                    <div key={budget.budgetId || budget.id || idx}>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-[var(--color-text-secondary)]">
-                          {budget.categoryName}
-                        </span>
-                        <span className="text-[var(--color-text-primary)]">
-                          ${spentAmount.toFixed(2)} / ${budgetAmount.toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="h-2 rounded-full bg-[var(--color-bg-tertiary)] overflow-hidden">
-                        <div
-                          className={`h-full transition-all ${isOverBudget
-                            ? "bg-[var(--color-error)]"
-                            : percentage > 80
-                              ? "bg-[var(--color-primary)]"
-                              : "bg-[var(--color-success)]"
-                            }`}
-                          style={{ width: `${Math.min(percentage, 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </Card>
-          ) : (
-            <Card>
-              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
-                Budget Overview
-              </h3>
-              <p className="text-sm text-[var(--color-text-muted)] mb-4">
-                No budgets set for this month.
-              </p>
-              <a
-                href="/budgets"
-                className="text-[var(--color-primary)] hover:underline text-sm"
-              >
-                Create a budget →
-              </a>
-            </Card>
+          ))}
+          {(!dashboardData?.recentTransactions || dashboardData.recentTransactions.length === 0) && (
+            <div className="text-gray-400 text-sm text-center">No recent transactions</div>
           )}
         </div>
       </div>

@@ -10,7 +10,7 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "var(--color-primary)", // Using CSS var directly for dynamic updates
+          DEFAULT: "var(--color-primary)",
           foreground: "var(--color-bg-primary)",
         },
         secondary: {
@@ -25,8 +25,12 @@ export default {
           DEFAULT: "var(--color-text-muted)",
           foreground: "var(--color-text-primary)",
         },
+        "surface-light": {
+          DEFAULT: "var(--color-surface-light)",
+          foreground: "var(--color-text-on-light)",
+        },
         accent: {
-          DEFAULT: "var(--color-accent)",
+          DEFAULT: "var(--color-primary)", /* Using primary as accent per rules */
           foreground: "white",
         },
         popover: {
@@ -37,15 +41,6 @@ export default {
           DEFAULT: "var(--color-bg-secondary)",
           foreground: "var(--color-text-primary)",
         },
-        // Industrial / Cyberpunk Palette
-        industrial: {
-          obsidian: "#050b14", // Deep background
-          slate: "#1e293b",    // Surfaces
-          neon: "#00f3ff",     // High impact cyan
-          plasma: "#8b5cf6",   // Secondary neon
-          warning: "#f59e0b",
-          danger: "#ef4444",
-        }
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -53,9 +48,7 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        'glow-cyan': '0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.3)',
-        'glow-plasma': '0 0 10px rgba(139, 92, 246, 0.5), 0 0 20px rgba(139, 92, 246, 0.3)',
-        'metallic': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.1), 0 4px 6px -1px rgba(0, 0, 0, 0.5)',
+        'accent-glow': '0 0 20px rgba(136,189,242,0.35)',
       },
       animation: {
         'scanline': 'scanline 2s linear infinite',

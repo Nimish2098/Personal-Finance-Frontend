@@ -10,6 +10,9 @@ import AccountsPage from "./pages/AccountsPage"
 import CategoriesPage from "./pages/CategoriesPage"
 import TransactionsPage from "./pages/TransactionsPage"
 import BudgetsPage from "./pages/BudgetsPage"
+import AnalyticsPage from "./pages/AnalyticsPage"
+import ReportsPage from "./pages/ReportsPage" // Add import
+import CalendarPage from "./pages/CalendarPage" // Add import
 
 export default function App() {
   return (
@@ -24,6 +27,36 @@ export default function App() {
             <ProtectedRoute>
               <Layout>
                 <Dashboard />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <AnalyticsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ReportsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/calendar"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <CalendarPage />
               </Layout>
             </ProtectedRoute>
           }
@@ -59,15 +92,15 @@ export default function App() {
           }
         />
         <Route
-  path="/budgets"
-  element={
-    <ProtectedRoute>
-      <Layout>
-        <BudgetsPage />
-      </Layout>
-    </ProtectedRoute>
-  }
-/>
+          path="/budgets"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <BudgetsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </AuthProvider>
   )
