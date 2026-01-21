@@ -17,10 +17,33 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+
+  const validatePassword = (pwd) => {
+    const minLength = 8
+    const hasUpperCase = /[A-Z]/.test(pwd)
+    const hasLowerCase = /[a-z]/.test(pwd)
+    const hasNumber = /[0-9]/.test(pwd)
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(pwd)
+
+    if (pwd.length < minLength) return "Password must be at least 8 characters long"
+    if (!hasUpperCase) return "Password must contain at least one uppercase letter"
+    if (!hasLowerCase) return "Password must contain at least one lowercase letter"
+    if (!hasNumber) return "Password must contain at least one number"
+    if (!hasSpecialChar) return "Password must contain at least one special character"
+    
+    return null
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError("")
+
+    const passwordError = validatePassword(password)
+    if (passwordError) {
+      setError(passwordError)
+      return
+    }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match")
@@ -69,14 +92,23 @@ export default function RegisterPage() {
             placeholder="your@email.com"
             required
           />
-          <Input
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            required
-          />
+          <div className="relative">
+            <Input
+              label="Password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-[38px] text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)]"
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
           <Input
             label="Confirm Password"
             type="password"
@@ -85,7 +117,17 @@ export default function RegisterPage() {
             placeholder="••••••••"
             required
           />
-          <Button type="submit" disabled={loading} className="w-full">
+          <div className="text-xs text-[var(--color-text-secondary)] space-y-1 ml-1">
+            <p>Password requirements:</p>
+            <ul className="list-disc pl-4 space-y-0.5">
+              <li className={password.length >= 8 ? "text-green-500" : ""}>At least 8 characters</li>
+              <li className={/[A-Z]/.test(password) ? "text-green-500" : ""}>One uppercase letter</li>
+              <li className={/[a-z]/.test(password) ? "text-green-500" : ""}>One lowercase letter</li>
+              <li className={/[0-9]/.test(password) ? "text-green-500" : ""}>One number</li>
+              <li className={/[!@#$%^&*(),.?":{}|<>]/.test(password) ? "text-green-500" : ""}>One special character</li>
+            </ul>
+          </div>
+          <Button type="submit" disabled={loading} className="w-full mt-6">
             {loading ? "Creating account..." : "Register"}
           </Button>
         </form>
