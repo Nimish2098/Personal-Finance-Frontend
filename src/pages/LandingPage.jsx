@@ -141,23 +141,23 @@ export default function LandingPage() {
                         <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />
                         <span className="text-xs text-green-700 dark:text-green-300">Income</span>
                       </div>
-                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">$5,420</p>
+                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">₹5,420</p>
                     </div>
                     <div className="bg-red-50 dark:bg-red-900/20 rounded-2xl p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <TrendingUp className="w-4 h-4 text-red-600 dark:text-red-400 rotate-180" />
                         <span className="text-xs text-red-700 dark:text-red-300">Expenses</span>
                       </div>
-                      <p className="text-2xl font-bold text-red-500 dark:text-red-400">$3,210</p>
+                      <p className="text-2xl font-bold text-red-500 dark:text-red-400">₹3,210</p>
                     </div>
                   </div>
 
                   {/* Mock Transactions */}
                   <div className="space-y-3 pt-4">
                     {[
-                      { name: 'Salary', amount: '+$4,200', color: 'green' },
-                      { name: 'Shopping', amount: '-$156', color: 'red' },
-                      { name: 'Food & Dining', amount: '-$89', color: 'red' }
+                      { name: 'Salary', amount: '+₹4,200', color: 'green' },
+                      { name: 'Shopping', amount: '-₹156', color: 'red' },
+                      { name: 'Food & Dining', amount: '-₹89', color: 'red' }
                     ].map((transaction, i) => (
                       <motion.div
                         key={i}

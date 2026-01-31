@@ -117,7 +117,7 @@ export default function Dashboard() {
           </div>
           <div className={`text-2xl font-bold mb-2 ${(dashboardData?.totalBalance || 0) < 0 ? 'text-red-500' : 'text-[var(--color-text-primary)]'
             }`}>
-            ${(dashboardData?.totalBalance || 0).toFixed(2)}
+            ₹{(dashboardData?.totalBalance || 0).toFixed(2)}
           </div>
           <div className="text-xs font-medium text-green-500">
             +{savingsRate.toFixed(1)}% savings rate
@@ -133,7 +133,7 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="text-2xl font-bold text-green-600 mb-2">
-            ${(dashboardData?.totalIncome || 0).toFixed(2)}
+            ₹{(dashboardData?.totalIncome || 0).toFixed(2)}
           </div>
           <div className="text-xs text-[var(--color-text-muted)]">
             <Calendar className="w-3 h-3 inline mr-1" />
@@ -150,7 +150,7 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="text-2xl font-bold text-red-500 mb-0">
-            ${(dashboardData?.totalExpense || 0).toFixed(2)}
+            ₹{(dashboardData?.totalExpense || 0).toFixed(2)}
           </div>
         </div>
 
@@ -166,7 +166,7 @@ export default function Dashboard() {
             {dashboardData?.recentTransactions?.length || 0}
           </div>
           <div className="text-xs text-[var(--color-text-muted)]">
-            Avg: ${((dashboardData?.totalExpense || 0) / (dashboardData?.recentTransactions?.length || 1)).toFixed(2)}
+            Avg: ₹{((dashboardData?.totalExpense || 0) / (dashboardData?.recentTransactions?.length || 1)).toFixed(2)}
           </div>
         </div>
       </div>
@@ -227,17 +227,17 @@ export default function Dashboard() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={dashboardData?.categoryBreakdown || []}
+                  data={dashboardData?.expenseByCategory || []}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
                   outerRadius={100}
                   fill="#8884d8"
                   paddingAngle={0}
-                  dataKey="value"
+                  dataKey="amount"
                   stroke="none"
                 >
-                  {(dashboardData?.categoryBreakdown || []).map((entry, index) => (
+                  {(dashboardData?.expenseByCategory || []).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -259,24 +259,24 @@ export default function Dashboard() {
       <div className="bg-[var(--color-bg-secondary)] p-6 rounded-2xl shadow-sm border border-[var(--color-border)]">
         <h3 className="font-bold text-[var(--color-text-primary)] mb-6">Top Spending Categories</h3>
         <div className="space-y-6">
-          {dashboardData?.categoryBreakdown?.map((cat, idx) => (
+          {dashboardData?.expenseByCategory?.map((cat, idx) => (
             <div key={idx}>
               <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                  <span className="text-[var(--color-text-secondary)] font-medium">{cat.name}</span>
+                  <span className="text-[var(--color-text-secondary)] font-medium">{cat.category}</span>
                 </div>
-                <span className="font-bold text-[var(--color-text-primary)]">${cat.value.toFixed(2)}</span>
+                <span className="font-bold text-[var(--color-text-primary)]">₹{cat.amount?.toFixed(2)}</span>
               </div>
               <div className="h-2 w-full bg-blue-50 dark:bg-blue-900/20 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-blue-500 rounded-full"
-                  style={{ width: `${(cat.value / (dashboardData.totalExpense || 1)) * 100}%` }}
+                  style={{ width: `${(cat.amount / (dashboardData.totalExpense || 1)) * 100}%` }}
                 />
               </div>
             </div>
           ))}
-          {(!dashboardData?.categoryBreakdown || dashboardData.categoryBreakdown.length === 0) && (
+          {(!dashboardData?.expenseByCategory || dashboardData.expenseByCategory.length === 0) && (
             <div className="text-[var(--color-text-muted)] text-sm text-center">No category data available</div>
           )}
         </div>
@@ -307,7 +307,7 @@ export default function Dashboard() {
                 </div>
                 <div className={`font-bold ${tx.type === 'INCOME' ? 'text-green-600' : 'text-red-500'
                   }`}>
-                  {tx.type === 'INCOME' ? '+' : '-'}${Math.abs(tx.amount).toFixed(2)}
+                  {tx.type === 'INCOME' ? '+' : '-'}₹{Math.abs(tx.amount).toFixed(2)}
                 </div>
               </div>
             </div>

@@ -1,5 +1,6 @@
 "use client"
 import { Link, useLocation } from "react-router-dom"
+import { useAuth } from "../context/AuthContext"
 import {
     LayoutDashboard,
     TrendingUp,
@@ -17,6 +18,7 @@ import { transactionService } from "../services/transactions"
 
 export default function Sidebar({ isOpen, onClose }) {
     const location = useLocation()
+    const { logout } = useAuth()
 
     const navLinks = [
         { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -106,6 +108,17 @@ export default function Sidebar({ isOpen, onClose }) {
                         >
                             <Download className="w-5 h-5 mr-3 text-gray-500" />
                             Export Data
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                logout()
+                                onClose && onClose()
+                            }}
+                            className="w-full flex items-center px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors font-medium mt-2"
+                        >
+                            <LogOut className="w-5 h-5 mr-3" />
+                            Sign Out
                         </button>
                     </nav>
 

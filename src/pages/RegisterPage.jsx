@@ -53,12 +53,19 @@ export default function RegisterPage() {
     setLoading(true)
 
     try {
-      const response = await authService.register(name, email, password)
+      // First register (returns void/200 OK)
+      await authService.register(name, email, password)
 
-      login(response.user, response.token)
+      // Then login to get the token
+      const loginResponse = await authService.login(email, password)
+
+      login(loginResponse.user, loginResponse.token)
       navigate("/dashboard")
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed")
+      console.error("Registration error:", err);
+      // specific error message or fallback
+      const errorMsg = err.response?.data?.message || err.response?.data || "Registration failed";
+      setError(typeof errorMsg === 'string' ? errorMsg : "Registration failed")
     } finally {
       setLoading(false)
     }

@@ -363,7 +363,7 @@ export default function TransactionsPage() {
                       className={`py-4 px-6 text-sm text-right font-bold ${tx.type?.toUpperCase() === "INCOME" ? "text-green-600" : "text-red-500"
                         }`}
                     >
-                      {tx.type?.toUpperCase() === "INCOME" ? "+" : "-"}${Math.abs(tx.amount).toFixed(2)}
+                      {tx.type?.toUpperCase() === "INCOME" ? "+" : "-"}₹{Math.abs(tx.amount).toFixed(2)}
                     </td>
                   </tr>
                 ))}

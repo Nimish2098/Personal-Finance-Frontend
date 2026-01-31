@@ -13,10 +13,10 @@ export default function AccountsPage() {
   const [error, setError] = useState("")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [formData, setFormData] = useState({
-  name: "",
-  type: "CASH",     
-  balance: 0,
-})
+    name: "",
+    type: "CASH",
+    balance: 0,
+  })
 
 
 
@@ -77,7 +77,7 @@ export default function AccountsPage() {
           {accounts.map((account) => (
             <Card key={account.id}>
               <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">{account.name}</h3>
-              <p className="text-2xl font-bold text-[var(--color-primary)]">${account.balance}</p>
+              <p className="text-2xl font-bold text-[var(--color-primary)]">₹{account.balance}</p>
             </Card>
           ))}
         </div>
@@ -92,8 +92,8 @@ export default function AccountsPage() {
               required
             />
             <div>
-          <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
-            Account Type
+              <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-2">
+                Account Type
               </label>
               <select
                 value={formData.type}
@@ -109,16 +109,16 @@ export default function AccountsPage() {
               </select>
             </div>
 
-           <Input
-                label="Initial Balance"
-                type="number"
-                step="0.01"
-                value={formData.balance}
-                onChange={(e) =>
-                  setFormData({ ...formData, balance: Number(e.target.value) })
-                }
-                required
-              />
+            <Input
+              label="Initial Balance"
+              type="number"
+              step="0.01"
+              value={formData.balance}
+              onChange={(e) =>
+                setFormData({ ...formData, balance: Number(e.target.value) })
+              }
+              required
+            />
             <Button type="submit" className="w-full">
               Create Account
             </Button>
