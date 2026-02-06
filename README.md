@@ -23,6 +23,8 @@ A production-ready React frontend for managing personal finances with real-time 
 - **Charts**: Recharts
 - **Styling**: Tailwind CSS
 - **Package Manager**: npm
+## Demo
+![Demo](assets/ezgif.com-speed.gif)
 
 ## Getting Started
 
